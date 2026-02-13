@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRDF — Carte Interventions Gaz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --dark:#0a1628;--blue:#1a3a5c;--cyan:#00b4d8;--teal:#0096a7;--green:#2dc653;
+  --orange:#ff8c42;--red:#e63946;--yellow:#ffd166;--surface:#111d30;--card:#162137;
+  --border:#1e3150;--text:#c8d6e5;--white:#f0f4f8;--radius:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);height:100vh;overflow:hidden}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--surface),var(--blue));border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;z-index:100;position:relative}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;background:var(--cyan);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--dark);box-shadow:0 0 20px rgba(0,180,216,0.3)}
+.header h1{font-size:16px;font-weight:600;color:var(--white)}
+.header h1 span{color:var(--cyan)}
+.header-right{display:flex;align-items:center;gap:10px}
+.header-stats{display:flex;gap:14px;font-size:11px}
+.stat-item{display:flex;align-items:center;gap:4px}
+.stat-dot{width:7px;height:7px;border-radius:50%}
+
+/* BUTTONS */
+.btn{padding:8px 14px;border:none;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-weight:600;font-size:11px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--teal));color:var(--dark);box-shadow:0 3px 12px rgba(0,180,216,0.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,180,216,0.4)}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-green{background:var(--green);color:var(--dark)}
+.btn-green:hover{box-shadow:0 3px 12px rgba(45,198,83,0.3)}
+.btn-red{background:var(--red);color:white}
+.btn-orange{background:var(--orange);color:var(--dark)}
+.btn-sm{padding:6px 10px;font-size:10px}
+
+/* LAYOUT */
+.main{display:flex;height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.sidebar{width:400px;min-width:400px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--border)}
+.sidebar-tab{flex:1;padding:9px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.7px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text);transition:all 0.2s}
+.sidebar-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(0,180,216,0.05)}
+.sidebar-tab:hover{background:rgba(255,255,255,0.03)}
+
+/* PANELS */
+.panel{padding:12px;flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.panel.hidden{display:none}
+.label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--cyan)}
+textarea{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px;resize:none;flex:1;min-height:100px;line-height:1.7}
+textarea:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,180,216,0.1)}
+textarea::placeholder{color:#3a5070}
+input[type="text"],input[type="search"]{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 10px;width:100%}
+input:focus{outline:none;border-color:var(--cyan)}
+
+/* FILTERS */
+.filters{padding:8px;border-bottom:1px solid var(--border);display:flex;gap:5px;flex-wrap:wrap}
+.filter-btn{font-size:9px;padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s}
+.filter-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,180,216,0.08)}
+
+/* LIST */
+.list-search{padding:6px 8px;border-bottom:1px solid var(--border)}
+.list-panel{flex:1;overflow-y:auto;padding:4px}
+.list-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;cursor:pointer;transition:all 0.12s;border:1px solid transparent;margin-bottom:1px}
+.list-item:hover{background:rgba(0,180,216,0.05);border-color:var(--border)}
+.list-item.active{background:rgba(0,180,216,0.1);border-color:var(--cyan)}
+.list-item-num{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.list-item-num.indiv{background:rgba(0,180,216,0.15);color:var(--cyan)}
+.list-item-num.collec{background:rgba(255,140,66,0.15);color:var(--orange)}
+.list-item-info{flex:1;min-width:0}
+.list-item-addr{font-size:12px;font-weight:500;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item-meta{font-size:9px;color:#5a7a9a;margin-top:2px;display:flex;gap:6px;align-items:center}
+.badge{font-size:8px;padding:2px 6px;border-radius:20px;font-weight:600;white-space:nowrap}
+.badge-indiv{background:rgba(0,180,216,0.12);color:var(--cyan)}
+.badge-collec{background:rgba(255,140,66,0.12);color:var(--orange)}
+.badge-oui{background:rgba(45,198,83,0.12);color:var(--green)}
+.badge-non{background:rgba(230,57,70,0.12);color:var(--red)}
+.badge-incertain{background:rgba(255,209,102,0.12);color:var(--yellow)}
+.badge-realise{background:rgba(45,198,83,0.2);color:var(--green)}
+.badge-nr{background:rgba(230,57,70,0.2);color:var(--red)}
+.badge-afaire{background:rgba(200,214,229,0.1);color:var(--text)}
+
+/* MAP */
+.map-container{flex:1;position:relative}
+#map{width:100%;height:100%}
+
+/* DETAIL OVERLAY */
+.detail-overlay{position:absolute;top:10px;right:10px;width:380px;max-height:calc(100% - 20px);background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow-y:auto;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,0.5);display:none;animation:slideIn 0.25s ease}
+.detail-overlay.visible{display:block}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+.detail-header{padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:start}
+.detail-title{font-size:14px;font-weight:700;color:var(--white);line-height:1.3}
+.detail-close{width:26px;height:26px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.detail-close:hover{border-color:var(--red);color:var(--red)}
+
+.detail-sv{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:10px}
+.sv-img{width:100%;aspect-ratio:16/10;border-radius:8px;object-fit:cover;background:var(--card);cursor:pointer;transition:transform 0.2s}
+.sv-img:hover{transform:scale(1.03)}
+.sv-label{font-size:8px;text-align:center;color:#5a7a9a;margin-top:2px}
+
+.detail-actions{padding:0 10px 8px;display:flex;gap:5px}
+.detail-actions .btn{flex:1}
+
+.detail-info{padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:5px}
+.info-row{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.info-label{color:#5a7a9a}
+.info-value{color:var(--white);font-weight:500}
+
+.conf-bar{display:flex;align-items:center;gap:5px}
+.conf-track{width:50px;height:4px;background:var(--card);border-radius:2px;overflow:hidden}
+.conf-fill{height:100%;border-radius:2px}
+.conf-text{font-size:9px;font-family:'JetBrains Mono',monospace}
+
+.detail-obs{margin:0 10px 8px;font-size:11px;color:var(--text);line-height:1.5;font-style:italic;background:rgba(0,180,216,0.03);border-radius:8px;padding:10px}
+.detail-obs-title{font-size:9px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-style:normal}
+
+/* ANNOTATION SECTION */
+.detail-annotation{padding:10px;border-top:1px solid var(--border)}
+.annotation-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--orange);margin-bottom:8px}
+.annotation-comment{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;padding:8px;resize:vertical;min-height:50px;max-height:120px}
+.annotation-comment:focus{outline:none;border-color:var(--cyan)}
+.annotation-buttons{display:flex;gap:6px;margin-top:8px}
+.annotation-buttons .btn{flex:1}
+.annotation-saved{font-size:10px;color:var(--green);text-align:center;margin-top:6px;display:none}
+
+.detail-syndic{padding:10px;border-top:1px solid var(--border)}
+.syndic-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px}
+.syndic-title{font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:var(--orange);font-weight:600;margin-bottom:5px}
+.syndic-name{font-size:12px;font-weight:600;color:var(--white)}
+.syndic-phone{font-size:11px;color:var(--cyan);margin-top:2px}
+
+/* LOADING */
+.loading-overlay{position:absolute;inset:0;background:rgba(10,22,40,0.85);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
+.loading-overlay.hidden{display:none}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);padding:10px 20px;border-radius:10px;font-size:12px;z-index:300;box-shadow:0 10px 40px rgba(0,0,0,0.4);display:none}
+.toast.visible{display:block;animation:toastIn 0.3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* PROGRESS */
+.progress-bar{height:3px;background:var(--card);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:2px;transition:width 0.3s}
+
+/* EXPORT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,22,40,0.8);z-index:400;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:420px;max-width:90vw;box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+.modal h2{font-size:16px;color:var(--white);margin-bottom:4px}
+.modal p{font-size:12px;color:var(--text);margin-bottom:16px}
+.modal-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.modal-stat{background:var(--card);border-radius:10px;padding:12px;text-align:center}
+.modal-stat-num{font-size:22px;font-weight:700;color:var(--white)}
+.modal-stat-label{font-size:10px;color:var(--text);margin-top:2px}
+.modal-actions{display:flex;gap:8px}
+.modal-actions .btn{flex:1}
+
+/* TECHNICIEN INPUT */
+.tech-bar{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.tech-bar label{font-size:10px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+.tech-bar input{flex:1;padding:6px 8px;font-size:11px}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">GrDF</div>
+    <h1>Carte <span>Interventions</span></h1>
+  </div>
+  <div class="header-right">
+    <div class="header-stats">
+      <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div><span id="statTotal">–</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--cyan)"></div><span id="statIndiv">–</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--orange)"></div><span id="statCollec">–</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--yellow)"></div><span id="statRegard">–</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div><span id="statDone">–</span></div>
+    </div>
+    <button class="btn btn-orange btn-sm" onclick="showExportModal()">&#8681; Export Excel</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <div class="sidebar-tab active" data-tab="list" onclick="switchTab('list')">Liste</div>
+      <div class="sidebar-tab" data-tab="input" onclick="switchTab('input')">+ Ajouter</div>
+    </div>
+
+    <div class="tech-bar">
+      <label>Technicien</label>
+      <input type="text" id="techName" placeholder="Votre nom..." value="">
+    </div>
+
+    <!-- LIST -->
+    <div id="listTab" style="display:flex;flex:1;flex-direction:column;overflow:hidden">
+      <div class="filters">
+        <button class="filter-btn active" data-f="all" onclick="setFilter('all')">Tous</button>
+        <button class="filter-btn" data-f="Individuel" onclick="setFilter('Individuel')">Individuel</button>
+        <button class="filter-btn" data-f="Collectif" onclick="setFilter('Collectif')">Collectif</button>
+        <button class="filter-btn" data-f="regard_oui" onclick="setFilter('regard_oui')">Regard +</button>
+        <button class="filter-btn" data-f="afaire" onclick="setFilter('afaire')">À faire</button>
+        <button class="filter-btn" data-f="realise" onclick="setFilter('realise')">Réalisés</button>
+        <button class="filter-btn" data-f="nr" onclick="setFilter('nr')">Non réal.</button>
+      </div>
+      <div class="list-search"><input type="search" id="listSearch" placeholder="Rechercher..." oninput="filterList()"></div>
+      <div class="list-panel" id="listPanel"></div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="panel hidden" id="inputPanel">
+      <div class="label">Ville par défaut</div>
+      <input type="text" id="defaultCity" value="Rennes">
+      <div class="label">Nouvelles adresses</div>
+      <textarea id="addressInput" placeholder="Collez vos adresses séparées par , ; . ou retours à la ligne..."></textarea>
+      <div class="progress-bar" id="progressBar" style="display:none"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div style="font-size:10px;text-align:center;color:var(--text)" id="statusText"></div>
+      <button class="btn btn-primary" id="btnAdd" onclick="addAddresses()">Ajouter et lancer l'analyse IA</button>
+      <div style="font-size:9px;color:#3a5a7a;text-align:center">Les adresses seront insérées dans Supabase et analysées par l'IA via n8n</div>
+    </div>
+  </div>
+
+  <div class="map-container">
+    <div id="map"></div>
+
+    <div class="detail-overlay" id="detailOverlay">
+      <div class="detail-header">
+        <div><div class="detail-title" id="detailTitle"></div><div style="font-size:10px;color:#5a7a9a;margin-top:3px" id="detailSub"></div></div>
+        <button class="detail-close" onclick="closeDetail()">&times;</button>
+      </div>
+      <div class="detail-sv" id="detailSV"></div>
+      <div class="detail-actions">
+        <button class="btn btn-primary btn-sm" onclick="openNav()">&#9737; Itinéraire</button>
+        <button class="btn btn-secondary btn-sm" onclick="openSV()">&#9673; Street View</button>
+      </div>
+      <div class="detail-info" id="detailInfo"></div>
+      <div class="detail-obs" id="detailObs" style="display:none"></div>
+      <div class="detail-annotation" id="detailAnnotation">
+        <div class="annotation-title">Annotation terrain</div>
+        <textarea class="annotation-comment" id="annotComment" placeholder="Commentaire libre..."></textarea>
+        <div class="annotation-buttons">
+          <button class="btn btn-green btn-sm" onclick="markIntervention('réalisé')">&#10003; Réalisé</button>
+          <button class="btn btn-red btn-sm" onclick="markIntervention('non réalisable')">&#10007; Non réalisable</button>
+          <button class="btn btn-secondary btn-sm" onclick="saveComment()">&#128190; Sauver</button>
+        </div>
+        <div class="annotation-saved" id="annotSaved">&#10003; Sauvegardé</div>
+      </div>
+      <div class="detail-syndic" id="detailSyndic" style="display:none"></div>
+    </div>
+
+    <div class="loading-overlay hidden" id="loadingOverlay">
+      <div style="text-align:center"><div class="spinner"></div><div style="color:var(--white);font-weight:500" id="loadingText">Chargement...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h2>Export fin de tournée</h2>
+    <p>Générer le fichier Excel récapitulatif de la tournée.</p>
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="modal-stat-num" id="expTotal">0</div><div class="modal-stat-label">Total</div></div>
+      <div class="modal-stat"><div class="modal-stat-num" id="expDone" style="color:var(--green)">0</div><div class="modal-stat-label">Réalisés</div></div>
+      <div class="modal-stat"><div class="modal-stat-num" id="expNR" style="color:var(--red)">0</div><div class="modal-stat-label">Non réal.</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-orange" onclick="exportExcel()">&#8681; Télécharger Excel</button>
+      <button class="btn btn-secondary" onclick="closeExportModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───
+const API_KEY = 'AIzaSyD6jdXmNJNx897qoys4D6Ku4j_kdoUGf7Y';
+const SB_URL = 'https://aiafvjhiprdldtwmktur.supabase.co';
+const SB_KEY = 'sb_publishable_PY2N4dgVPxdys4aAr66dkQ__DytKqwL';
+// Remplace par ton URL webhook n8n après configuration
+const N8N_WEBHOOK = '';
+
+let map, markers = [], points = [], selectedPoint = null, geocoder, currentFilter = 'all';
+
+// ─── GOOGLE MAPS ───
+function loadGMaps() {
+  return new Promise((res, rej) => {
+    if (window.google && window.google.maps) return res();
+    const s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + API_KEY + '&libraries=places,geometry';
+    s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+}
+
+async function initMap() {
+  await loadGMaps();
+  map = new google.maps.Map(document.getElementById('map'), {
+    center:{lat:48.1173,lng:-1.6778}, zoom:13,
+    styles:[
+      {elementType:"geometry",stylers:[{color:"#0d1b2a"}]},
+      {elementType:"labels.text.stroke",stylers:[{color:"#0d1b2a"}]},
+      {elementType:"labels.text.fill",stylers:[{color:"#4a6a8a"}]},
+      {featureType:"road",elementType:"geometry",stylers:[{color:"#1b2d44"}]},
+      {featureType:"road",elementType:"geometry.stroke",stylers:[{color:"#1e3a5a"}]},
+      {featureType:"road.highway",elementType:"geometry",stylers:[{color:"#1e3a5a"}]},
+      {featureType:"water",elementType:"geometry",stylers:[{color:"#0a1628"}]},
+      {featureType:"poi",stylers:[{visibility:"off"}]},
+      {featureType:"transit",stylers:[{visibility:"off"}]}
+    ],
+    disableDefaultUI:true, zoomControl:true, fullscreenControl:true
+  });
+  geocoder = new google.maps.Geocoder();
+}
+
+// ─── SUPABASE ───
+async function sbFetch(path, opts = {}) {
+  const h = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+  if (opts.headers) Object.assign(h, opts.headers);
+  const r = await fetch(SB_URL + path, {...opts, headers: h});
+  if (opts.method === 'PATCH') return r.ok;
+  return r.json();
+}
+
+async function loadData() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingText').textContent = 'Chargement des interventions...';
+  try {
+    const data = await sbFetch('/rest/v1/interventions?select=*&order=adresse.asc');
+    points = data.filter(d => d.latitude && d.longitude).map((d, i) => {
+      let obs = null;
+      try {
+        const brut = typeof d.ia_analyse_brute === 'string' ? JSON.parse(d.ia_analyse_brute) : d.ia_analyse_brute;
+        if (brut) obs = brut.observations;
+      } catch(e) {}
+      return {
+        id:d.id, idx:i, raw:d.adresse, full:d.adresse+', '+(d.ville||'Rennes'),
+        formatted:d.adresse_formatee||d.adresse, lat:d.latitude, lng:d.longitude,
+        type:d.type_ia||d.type_initial||'Individuel', typeInit:d.type_initial, typeIa:d.type_ia,
+        typeConf:d.type_ia_confiance, regardGaz:d.regard_gaz||'À vérifier',
+        regardConf:d.regard_gaz_confiance, obs:obs, model:d.ia_model,
+        statut:d.statut, statutInterv:d.statut_intervention||'à faire',
+        commentaire:d.commentaire||'', technicien:d.technicien||'',
+        dateReal:d.date_realisation,
+        syndic:d.type_ia==='Collectif'?randSyndic():null,
+        sv1:d.streetview_img1_url, sv2:d.streetview_img2_url
+      };
+    });
+    clearMarkers(); placeMarkers(); fitBounds(); updateStats(); renderList();
+    showToast(points.length + ' interventions chargées');
+  } catch(e) { showToast('Erreur chargement'); console.error(e); }
+  document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+function randSyndic() {
+  const s = [{nom:"Nexity Lamy",tel:"02 99 67 XX XX"},{nom:"Foncia Rennes",tel:"02 99 30 XX XX"},{nom:"Citya Belvia",tel:"02 99 22 XX XX"},{nom:"Sergic Bretagne",tel:"02 23 40 XX XX"},{nom:"Immo de France",tel:"02 99 14 XX XX"},{nom:"Square Habitat",tel:"02 99 65 XX XX"}];
+  return s[Math.floor(Math.random()*s.length)];
+}
+
+// ─── MARKERS ───
+function markerColor(pt) {
+  if (pt.statutInterv === 'réalisé') return '#2dc653';
+  if (pt.statutInterv === 'non réalisable') return '#e63946';
+  if (pt.regardGaz === 'Oui') return '#ffd166';
+  return pt.type === 'Collectif' ? '#ff8c42' : '#00b4d8';
+}
+
+function placeMarkers() {
+  points.forEach((pt, i) => {
+    const c = markerColor(pt);
+    const m = new google.maps.Marker({
+      position:{lat:pt.lat,lng:pt.lng}, map,
+      title:pt.raw,
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:c,fillOpacity:0.9,strokeColor:'#fff',strokeWeight:2},
+      label:{text:String(i+1),color:'#fff',fontSize:'9px',fontWeight:'700'},
+      zIndex:pt.statutInterv==='réalisé'?0:2
+    });
+    m.addListener('click',()=>selectPoint(pt));
+    markers.push(m);
+  });
+}
+
+function clearMarkers(){markers.forEach(m=>m.setMap(null));markers=[]}
+function fitBounds(){if(!points.length)return;const b=new google.maps.LatLngBounds();points.forEach(p=>b.extend({lat:p.lat,lng:p.lng}));map.fitBounds(b,{padding:50})}
+
+function refreshMarker(pt) {
+  const i = points.findIndex(p=>p.id===pt.id);
+  if (i===-1) return;
+  markers[i].setIcon({path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:markerColor(pt),fillOpacity:0.9,strokeColor:'#fff',strokeWeight:2});
+}
+
+function updateMarkerVis() {
+  markers.forEach((m,i) => {
+    const pt = points[i]; let show = true;
+    if (currentFilter==='Individuel'&&pt.type!=='Individuel') show=false;
+    if (currentFilter==='Collectif'&&pt.type!=='Collectif') show=false;
+    if (currentFilter==='regard_oui'&&pt.regardGaz!=='Oui') show=false;
+    if (currentFilter==='afaire'&&pt.statutInterv!=='à faire') show=false;
+    if (currentFilter==='realise'&&pt.statutInterv!=='réalisé') show=false;
+    if (currentFilter==='nr'&&pt.statutInterv!=='non réalisable') show=false;
+    m.setVisible(show);
+  });
+}
+
+// ─── SELECT ───
+function selectPoint(pt) {
+  selectedPoint = pt;
+  markers.forEach((m,i)=>{
+    const p=points[i],a=p.id===pt.id;
+    m.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:a?13:9,fillColor:a?'#fff':markerColor(p),fillOpacity:0.9,strokeColor:a?'var(--cyan)':'#fff',strokeWeight:a?3:2});
+    m.setZIndex(a?10:1);
+  });
+  document.querySelectorAll('.list-item').forEach(e=>e.classList.remove('active'));
+  const li=document.getElementById('li-'+pt.id);
+  if(li){li.classList.add('active');li.scrollIntoView({behavior:'smooth',block:'nearest'})}
+
+  document.getElementById('detailTitle').textContent = pt.raw;
+  document.getElementById('detailSub').textContent = pt.formatted;
+
+  // Street View
+  const sv = document.getElementById('detailSV'); sv.innerHTML = '';
+  [{h:0,l:'Vue façade',u:pt.sv1},{h:180,l:'Vue opposée',u:pt.sv2}].forEach(a=>{
+    const d=document.createElement('div');
+    const img=document.createElement('img');img.className='sv-img';
+    img.src=a.u||('https://maps.googleapis.com/maps/api/streetview?size=600x400&location='+pt.lat+','+pt.lng+'&heading='+a.h+'&pitch=5&fov=90&key='+API_KEY);
+    img.loading='lazy';
+    img.onclick=()=>window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+pt.lat+','+pt.lng+'&heading='+a.h,'_blank');
+    d.appendChild(img);
+    const lb=document.createElement('div');lb.className='sv-label';lb.textContent=a.l;d.appendChild(lb);
+    sv.appendChild(d);
+  });
+
+  // Info
+  const cc = v => v>=0.8?'var(--green)':v>=0.5?'var(--yellow)':'var(--red)';
+  const rb = pt.regardGaz==='Oui'?'badge-oui':pt.regardGaz==='Non'?'badge-non':'badge-incertain';
+  const sb = pt.statutInterv==='réalisé'?'badge-realise':pt.statutInterv==='non réalisable'?'badge-nr':'badge-afaire';
+  const info = document.getElementById('detailInfo');
+  info.innerHTML = '<div class="info-row"><span class="info-label">Statut</span><span class="info-value"><span class="badge '+sb+'">'+pt.statutInterv+'</span></span></div>'
+    +'<div class="info-row"><span class="info-label">Type IA</span><span class="info-value"><span class="badge '+(pt.type==='Individuel'?'badge-indiv':'badge-collec')+'">'+pt.type+'</span></span></div>'
+    +(pt.typeConf!=null?'<div class="info-row"><span class="info-label">Confiance</span><span class="info-value"><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:'+(pt.typeConf*100)+'%;background:'+cc(pt.typeConf)+'"></div></div><span class="conf-text" style="color:'+cc(pt.typeConf)+'">'+Math.round(pt.typeConf*100)+'%</span></div></span></div>':'')
+    +'<div class="info-row"><span class="info-label">Regard Gaz</span><span class="info-value"><span class="badge '+rb+'">'+pt.regardGaz+'</span></span></div>'
+    +(pt.regardConf!=null?'<div class="info-row"><span class="info-label">Conf. regard</span><span class="info-value"><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:'+(pt.regardConf*100)+'%;background:'+cc(pt.regardConf)+'"></div></div><span class="conf-text" style="color:'+cc(pt.regardConf)+'">'+Math.round(pt.regardConf*100)+'%</span></div></span></div>':'')
+    +'<div class="info-row"><span class="info-label">Coordonnées</span><span class="info-value" style="font-family:\'JetBrains Mono\',monospace;font-size:9px">'+pt.lat.toFixed(5)+', '+pt.lng.toFixed(5)+'</span></div>';
+
+  // Observations
+  const obs=document.getElementById('detailObs');
+  if(pt.obs){obs.style.display='block';obs.innerHTML='<div class="detail-obs-title">Observations IA</div>'+pt.obs}else{obs.style.display='none'}
+
+  // Annotation
+  document.getElementById('annotComment').value = pt.commentaire;
+  document.getElementById('annotSaved').style.display = 'none';
+
+  // Syndic
+  const syn=document.getElementById('detailSyndic');
+  if(pt.syndic&&pt.type==='Collectif'){syn.style.display='block';syn.innerHTML='<div class="syndic-card"><div class="syndic-title">Syndic</div><div class="syndic-name">'+pt.syndic.nom+'</div><div class="syndic-phone">'+pt.syndic.tel+'</div></div>'}
+  else{syn.style.display='none'}
+
+  document.getElementById('detailOverlay').classList.add('visible');
+  map.panTo({lat:pt.lat,lng:pt.lng});
+}
+
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('visible');selectedPoint=null;markers.forEach((m,i)=>{const p=points[i];m.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:markerColor(p),fillOpacity:0.9,strokeColor:'#fff',strokeWeight:2})})}
+function openNav(){if(!selectedPoint)return;window.open('https://www.google.com/maps/dir/?api=1&destination='+selectedPoint.lat+','+selectedPoint.lng+'&travelmode=driving','_blank')}
+function openSV(){if(!selectedPoint)return;window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+selectedPoint.lat+','+selectedPoint.lng,'_blank')}
+
+// ─── ANNOTATIONS ───
+async function markIntervention(statut) {
+  if (!selectedPoint) return;
+  const tech = document.getElementById('techName').value.trim();
+  const comment = document.getElementById('annotComment').value.trim();
+  const now = new Date().toISOString();
+
+  const ok = await sbFetch('/rest/v1/interventions?id=eq.' + selectedPoint.id, {
+    method: 'PATCH',
+    headers: {'Prefer':'return=minimal'},
+    body: JSON.stringify({
+      statut_intervention: statut,
+      commentaire: comment,
+      technicien: tech,
+      date_realisation: now
+    })
+  });
+
+  if (ok) {
+    selectedPoint.statutInterv = statut;
+    selectedPoint.commentaire = comment;
+    selectedPoint.technicien = tech;
+    selectedPoint.dateReal = now;
+    refreshMarker(selectedPoint);
+    updateStats();
+    renderList();
+    selectPoint(selectedPoint); // refresh panel
+    document.getElementById('annotSaved').style.display = 'block';
+    document.getElementById('annotSaved').textContent = '✓ Marqué ' + statut;
+    showToast(selectedPoint.raw + ' → ' + statut);
+  } else {
+    showToast('Erreur de sauvegarde');
+  }
+}
+
+async function saveComment() {
+  if (!selectedPoint) return;
+  const comment = document.getElementById('annotComment').value.trim();
+  const tech = document.getElementById('techName').value.trim();
+
+  const ok = await sbFetch('/rest/v1/interventions?id=eq.' + selectedPoint.id, {
+    method: 'PATCH',
+    headers: {'Prefer':'return=minimal'},
+    body: JSON.stringify({ commentaire: comment, technicien: tech })
+  });
+
+  if (ok) {
+    selectedPoint.commentaire = comment;
+    selectedPoint.technicien = tech;
+    document.getElementById('annotSaved').style.display = 'block';
+    document.getElementById('annotSaved').textContent = '✓ Commentaire sauvegardé';
+    setTimeout(() => document.getElementById('annotSaved').style.display = 'none', 2000);
+  }
+}
+
+// ─── LIST ───
+function renderList() {
+  const panel = document.getElementById('listPanel'); panel.innerHTML = '';
+  getFiltered().forEach(pt => {
+    const el = document.createElement('div'); el.className = 'list-item'; el.id = 'li-' + pt.id;
+    el.onclick = () => selectPoint(pt);
+    const rb = pt.regardGaz==='Oui'?'badge-oui':pt.regardGaz==='Non'?'badge-non':'badge-incertain';
+    const sb = pt.statutInterv==='réalisé'?'badge-realise':pt.statutInterv==='non réalisable'?'badge-nr':'badge-afaire';
+    el.innerHTML = '<div class="list-item-num '+(pt.type==='Individuel'?'indiv':'collec')+'">'+(pt.idx+1)+'</div>'
+      +'<div class="list-item-info"><div class="list-item-addr">'+pt.raw+'</div>'
+      +'<div class="list-item-meta"><span class="badge '+(pt.type==='Individuel'?'badge-indiv':'badge-collec')+'">'+pt.type+'</span>'
+      +'<span class="badge '+rb+'">Regard: '+pt.regardGaz+'</span>'
+      +'<span class="badge '+sb+'">'+pt.statutInterv+'</span></div></div>';
+    panel.appendChild(el);
+  });
+}
+
+function getFiltered() {
+  const q = (document.getElementById('listSearch').value||'').toLowerCase();
+  return points.filter(pt => {
+    if (q && !pt.raw.toLowerCase().includes(q)) return false;
+    if (currentFilter==='Individuel'&&pt.type!=='Individuel') return false;
+    if (currentFilter==='Collectif'&&pt.type!=='Collectif') return false;
+    if (currentFilter==='regard_oui'&&pt.regardGaz!=='Oui') return false;
+    if (currentFilter==='afaire'&&pt.statutInterv!=='à faire') return false;
+    if (currentFilter==='realise'&&pt.statutInterv!=='réalisé') return false;
+    if (currentFilter==='nr'&&pt.statutInterv!=='non réalisable') return false;
+    return true;
+  });
+}
+
+function filterList(){renderList();updateMarkerVis()}
+function setFilter(f){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===f));filterList()}
+
+function updateStats() {
+  const t=points.length, indiv=points.filter(p=>p.type==='Individuel').length;
+  const collec=points.filter(p=>p.type==='Collectif').length;
+  const regard=points.filter(p=>p.regardGaz==='Oui').length;
+  const done=points.filter(p=>p.statutInterv==='réalisé').length;
+  document.getElementById('statTotal').textContent=t+' pts';
+  document.getElementById('statIndiv').textContent=indiv+' indiv';
+  document.getElementById('statCollec').textContent=collec+' collec';
+  document.getElementById('statRegard').textContent=regard+' regards';
+  document.getElementById('statDone').textContent=done+' faits';
+}
+
+// ─── TABS ───
+function switchTab(tab) {
+  document.querySelectorAll('.sidebar-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.sidebar-tab[data-tab="'+tab+'"]').classList.add('active');
+  document.getElementById('listTab').style.display=tab==='list'?'flex':'none';
+  const ip=document.getElementById('inputPanel');ip.classList.toggle('hidden',tab!=='input');ip.style.display=tab==='input'?'flex':'none';
+}
+
+// ─── ADD ADDRESSES (insert + trigger n8n) ───
+async function addAddresses() {
+  const text = document.getElementById('addressInput').value.trim();
+  if (!text) return showToast('Saisissez des adresses');
+  const city = document.getElementById('defaultCity').value.trim()||'Rennes';
+  const addrs = text.split(/[,;\.\n\r\|]+/).map(a=>a.replace(/^\s*[\*\-\d\.]+\s*/,'').trim()).filter(a=>a.length>3);
+  if (!addrs.length) return showToast('Aucune adresse');
+
+  document.getElementById('btnAdd').disabled = true;
+  document.getElementById('progressBar').style.display = 'block';
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingText').textContent = 'Insertion dans Supabase...';
+
+  // Insert into Supabase
+  const rows = addrs.map(a => ({adresse:a, ville:city, type_initial:'Individuel', statut:'en_attente', statut_intervention:'à faire'}));
+  
+  try {
+    await fetch(SB_URL + '/rest/v1/interventions', {
+      method: 'POST',
+      headers: {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify(rows)
+    });
+
+    // Trigger n8n webhook if configured
+    if (N8N_WEBHOOK) {
+      try {
+        await fetch(N8N_WEBHOOK, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({action:'analyse', count:addrs.length, city:city})
+        });
+        showToast(addrs.length + ' adresses ajoutées — Analyse IA lancée');
+      } catch(e) {
+        showToast(addrs.length + ' adresses ajoutées — Lancez le workflow n8n manuellement');
+      }
+    } else {
+      showToast(addrs.length + ' adresses ajoutées — Lancez le workflow n8n');
+    }
+
+    document.getElementById('addressInput').value = '';
+    await loadData();
+    switchTab('list');
+  } catch(e) {
+    showToast('Erreur insertion');
+    console.error(e);
+  }
+
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  document.getElementById('btnAdd').disabled = false;
+  document.getElementById('progressBar').style.display = 'none';
+}
+
+// ─── EXPORT EXCEL ───
+function showExportModal() {
+  const t=points.length, d=points.filter(p=>p.statutInterv==='réalisé').length, n=points.filter(p=>p.statutInterv==='non réalisable').length;
+  document.getElementById('expTotal').textContent=t;
+  document.getElementById('expDone').textContent=d;
+  document.getElementById('expNR').textContent=n;
+  document.getElementById('exportModal').classList.add('visible');
+}
+function closeExportModal(){document.getElementById('exportModal').classList.remove('visible')}
+
+function exportExcel() {
+  const tech = document.getElementById('techName').value.trim() || 'Technicien';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-FR');
+  const fileDate = now.toISOString().slice(0,10);
+
+  // Data rows
+  const data = points.map(pt => ({
+    'Adresse': pt.raw,
+    'Ville': 'Rennes',
+    'Type (Individuel/Collectif)': pt.type || 'Individuel',
+    'Réalisé (Oui/Non)': pt.statutInterv === 'réalisé' ? 'Oui' : (pt.statutInterv === 'non réalisable' ? 'Non' : ''),
+    'Regard Gaz': pt.regardGaz,
+    'Commentaire': pt.commentaire || '',
+    'Technicien': pt.technicien || tech,
+    'Date': pt.dateReal ? new Date(pt.dateReal).toLocaleDateString('fr-FR') : ''
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  
+  // Column widths
+  ws['!cols'] = [
+    {wch:35},{wch:10},{wch:22},{wch:16},{wch:12},{wch:30},{wch:18},{wch:12}
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Tournée ' + dateStr);
+
+  // Summary sheet
+  const summary = [
+    {Info:'Technicien',Valeur:tech},
+    {Info:'Date',Valeur:dateStr},
+    {Info:'Total interventions',Valeur:points.length},
+    {Info:'Réalisées',Valeur:points.filter(p=>p.statutInterv==='réalisé').length},
+    {Info:'Non réalisables',Valeur:points.filter(p=>p.statutInterv==='non réalisable').length},
+    {Info:'À faire',Valeur:points.filter(p=>p.statutInterv==='à faire').length},
+    {Info:'Individuels',Valeur:points.filter(p=>p.type==='Individuel').length},
+    {Info:'Collectifs',Valeur:points.filter(p=>p.type==='Collectif').length},
+    {Info:'Regards gaz détectés',Valeur:points.filter(p=>p.regardGaz==='Oui').length}
+  ];
+  const ws2 = XLSX.utils.json_to_sheet(summary);
+  ws2['!cols'] = [{wch:25},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Résumé');
+
+  XLSX.writeFile(wb, 'GRDF_Tournee_' + fileDate + '_' + tech.replace(/\s/g,'_') + '.xlsx');
+  closeExportModal();
+  showToast('Export Excel téléchargé');
+}
+
+// ─── UTILS ───
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),3000)}
+
+// ─── INIT ───
+initMap().then(() => loadData());
+</script>
+</body>
+</html>
