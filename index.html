@@ -253,6 +253,7 @@ input:focus{outline:none;border-color:var(--cyan)}
           <button class="filter-btn" data-tf="afaire" onclick="setTourneeFilter('afaire')">À faire</button>
           <button class="filter-btn" data-tf="Individuel" onclick="setTourneeFilter('Individuel')">Individuel</button>
           <button class="filter-btn" data-tf="Collectif" onclick="setTourneeFilter('Collectif')">Collectif</button>
+          <button class="filter-btn" data-tf="regard_oui" onclick="setTourneeFilter('regard_oui')">Regard +</button>
         </div>
         <div class="list-search"><input type="search" id="tourneeSearch" placeholder="Rechercher..." oninput="refreshTourneeList()"></div>
         <div class="list-panel" id="tourneeList"></div>
@@ -506,6 +507,7 @@ function getFilteredTournee(){
   if(tourneeFilter==='afaire')pts=pts.filter(p=>p.si==='à faire');
   if(tourneeFilter==='Individuel')pts=pts.filter(p=>p.type==='Individuel');
   if(tourneeFilter==='Collectif')pts=pts.filter(p=>p.type==='Collectif');
+  if(tourneeFilter==='regard_oui')pts=pts.filter(p=>p.regardGaz==='Oui');
   const q=(document.getElementById('tourneeSearch').value||'').toLowerCase();
   if(q.length>=2)pts=pts.filter(p=>p.raw.toLowerCase().includes(q));
   return pts;
@@ -590,6 +592,37 @@ function getFilteredVsic(){
 function refreshVsicList(){
   const pts=getFilteredVsic();
   renderList(document.getElementById('vsicList'),pts,true);
+  showVsicOnMap();
+}
+
+function showVsicOnMap(){
+  clearMarkers();
+  const afaire=allPoints.filter(p=>p.si==='à faire');
+  if(!afaire.length)return;
+  
+  const highlightTournee=vsicFilter==='tournee'&&tourneeLoaded;
+  
+  afaire.forEach((pt,i)=>{
+    const inT=tourneeIds.has(pt.id);
+    const highlighted=highlightTournee&&inT;
+    const dimmed=highlightTournee&&!inT;
+    
+    const m=new google.maps.Marker({
+      position:{lat:pt.lat,lng:pt.lng},map,title:pt.raw,
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        scale:highlighted?13:(dimmed?6:9),
+        fillColor:highlighted?'#fff':markerColor(pt),
+        fillOpacity:dimmed?0.35:0.9,
+        strokeColor:highlighted?'#2dc653':'#fff',
+        strokeWeight:highlighted?3:(dimmed?1:2)
+      },
+      label:highlighted?{text:'★',color:'#2dc653',fontSize:'10px',fontWeight:'700'}:(dimmed?null:{text:String(i+1),color:'#fff',fontSize:'9px',fontWeight:'700'}),
+      zIndex:highlighted?10:(dimmed?0:2)
+    });
+    m.addListener('click',()=>selectPoint(pt));markers.push(m);
+  });
+  fitBounds(afaire);
 }
 
 function setVsicFilter(f){
@@ -713,8 +746,6 @@ function switchTab(tab){
 
   if(tab==='tournee'&&tourneeLoaded)showTourneeOnMap();
   else if(tab==='vsic'){
-    clearMarkers();
-    // Default to tournee city if loaded
     if(tourneeLoaded&&vsicCityFilter==='all'){vsicCityFilter=tourneeCity;buildVsicCityFilter()}
     refreshVsicList();
   }else{clearMarkers()}
