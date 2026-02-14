@@ -78,7 +78,7 @@ input:focus{outline:none;border-color:var(--cyan)}
 .filters{padding:6px 8px;border-bottom:1px solid var(--border);display:flex;gap:4px;flex-wrap:wrap}
 .filter-btn{font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s}
 .filter-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,180,216,0.08)}
-.filter-btn.tournee-highlight{border-color:var(--green);color:var(--green);background:rgba(45,198,83,0.08)}
+.filter-btn.tournee-highlight{border-color:var(--green);color:var(--green);background:rgba(45,198,83,0.12);box-shadow:0 0 8px rgba(45,198,83,0.2)}
 
 /* CITY FILTER */
 .city-filter{padding:6px 8px;border-bottom:1px solid var(--border);display:flex;gap:4px;flex-wrap:wrap;align-items:center}
@@ -269,10 +269,11 @@ input:focus{outline:none;border-color:var(--cyan)}
       <div class="city-filter" id="vsicCityFilter"></div>
       <div class="filters" id="vsicFilters">
         <button class="filter-btn active" data-vf="all" onclick="setVsicFilter('all')">Tous</button>
-        <button class="filter-btn" data-vf="tournee" onclick="setVsicFilter('tournee')" id="vsicTourneeBtn" style="display:none">&#128205; Tournée</button>
         <button class="filter-btn" data-vf="Individuel" onclick="setVsicFilter('Individuel')">Individuel</button>
         <button class="filter-btn" data-vf="Collectif" onclick="setVsicFilter('Collectif')">Collectif</button>
         <button class="filter-btn" data-vf="regard_oui" onclick="setVsicFilter('regard_oui')">Regard +</button>
+        <span style="width:1px;height:18px;background:var(--border);margin:0 2px"></span>
+        <button class="filter-btn" id="vsicTourneeBtn" style="display:none" onclick="toggleVsicTournee()">&#128205; Tournée</button>
       </div>
       <div class="list-search"><input type="search" id="vsicSearch" placeholder="Rechercher adresse ou ville..." oninput="refreshVsicList()"></div>
       <div class="list-panel" id="vsicList"></div>
@@ -352,7 +353,7 @@ const N8N_WEBHOOK='https://n8n.srv1146963.hstgr.cloud/webhook/aaa1dc50-7aaf-4f27
 
 let map,markers=[],allPoints=[],tourneePoints=[],selectedPoint=null;
 let currentTab='tournee',tourneeFilter='all',vsicFilter='all',vsicCityFilter='all';
-let tourneeLoaded=false,tourneeCity='Rennes';
+let tourneeLoaded=false,tourneeCity='Rennes',vsicTourneeHighlight=false;
 let tourneeIds=new Set();
 let dbCities=[];
 
@@ -488,7 +489,7 @@ function loadTournee(){
 }
 
 function resetTournee(){
-  tourneeLoaded=false;tourneePoints=[];tourneeIds=new Set();
+  tourneeLoaded=false;tourneePoints=[];tourneeIds=new Set();vsicTourneeHighlight=false;
   document.getElementById('tourneeInput').style.display='flex';
   document.getElementById('tourneeLoaded').style.display='none';
   document.getElementById('tourneeBadge').className='tournee-badge inactive';
@@ -570,16 +571,12 @@ function getFilteredVsic(){
   if(vsicFilter==='Individuel')pts=pts.filter(p=>p.type==='Individuel');
   if(vsicFilter==='Collectif')pts=pts.filter(p=>p.type==='Collectif');
   if(vsicFilter==='regard_oui')pts=pts.filter(p=>p.regardGaz==='Oui');
-  if(vsicFilter==='tournee')pts=pts.filter(p=>tourneeIds.has(p.id));
   const q=(document.getElementById('vsicSearch').value||'').toLowerCase();
   if(q.length>=2)pts=pts.filter(p=>p.raw.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q));
   
-  // Sort: tournee city first, then tournee items highlighted
-  if(tourneeLoaded&&vsicCityFilter==='all'){
+  // Sort: tournee items first when highlight is on
+  if(tourneeLoaded){
     pts.sort((a,b)=>{
-      const aCity=a.ville===tourneeCity?0:1;
-      const bCity=b.ville===tourneeCity?0:1;
-      if(aCity!==bCity)return aCity-bCity;
       const aT=tourneeIds.has(a.id)?0:1;
       const bT=tourneeIds.has(b.id)?0:1;
       if(aT!==bT)return aT-bT;
@@ -592,20 +589,17 @@ function getFilteredVsic(){
 function refreshVsicList(){
   const pts=getFilteredVsic();
   renderList(document.getElementById('vsicList'),pts,true);
-  showVsicOnMap();
+  showVsicOnMap(pts);
 }
 
-function showVsicOnMap(){
+function showVsicOnMap(filteredPts){
   clearMarkers();
-  const afaire=allPoints.filter(p=>p.si==='à faire');
-  if(!afaire.length)return;
+  if(!filteredPts||!filteredPts.length)return;
   
-  const highlightTournee=vsicFilter==='tournee'&&tourneeLoaded;
-  
-  afaire.forEach((pt,i)=>{
+  filteredPts.forEach((pt,i)=>{
     const inT=tourneeIds.has(pt.id);
-    const highlighted=highlightTournee&&inT;
-    const dimmed=highlightTournee&&!inT;
+    const highlighted=vsicTourneeHighlight&&inT;
+    const dimmed=vsicTourneeHighlight&&!inT;
     
     const m=new google.maps.Marker({
       position:{lat:pt.lat,lng:pt.lng},map,title:pt.raw,
@@ -622,11 +616,19 @@ function showVsicOnMap(){
     });
     m.addListener('click',()=>selectPoint(pt));markers.push(m);
   });
-  fitBounds(afaire);
+  fitBounds(filteredPts);
 }
 
 function setVsicFilter(f){
-  vsicFilter=f;document.querySelectorAll('[data-vf]').forEach(b=>b.classList.toggle('active',b.dataset.vf===f));refreshVsicList();
+  vsicFilter=f;
+  document.querySelectorAll('[data-vf]').forEach(b=>b.classList.toggle('active',b.dataset.vf===f));
+  refreshVsicList();
+}
+
+function toggleVsicTournee(){
+  vsicTourneeHighlight=!vsicTourneeHighlight;
+  document.getElementById('vsicTourneeBtn').classList.toggle('tournee-highlight',vsicTourneeHighlight);
+  refreshVsicList();
 }
 
 // ─── LIST RENDER ───
@@ -677,7 +679,11 @@ function fitBounds(pts){if(!pts||!pts.length)return;if(pts.length===1){map.setCe
 // ─── SELECT ───
 function selectPoint(pt){
   selectedPoint=pt;
-  if(currentTab==='vsic'){clearMarkers();placeMarkers([pt]);map.setCenter({lat:pt.lat,lng:pt.lng});map.setZoom(16)}
+  if(currentTab==='vsic'){
+    // Don't clear markers, just pan to the point
+    map.panTo({lat:pt.lat,lng:pt.lng});
+    if(map.getZoom()<15)map.setZoom(15);
+  }
   document.querySelectorAll('.list-item').forEach(e=>e.classList.remove('active'));
   const li=document.getElementById('li-'+pt.id);if(li){li.classList.add('active');li.scrollIntoView({behavior:'smooth',block:'nearest'})}
   markers.forEach(m=>{const pos=m.getPosition();const isT=Math.abs(pos.lat()-pt.lat)<0.0001&&Math.abs(pos.lng()-pt.lng)<0.0001;m.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:isT?13:9,fillColor:isT?'#fff':markerColor(pt),fillOpacity:0.9,strokeColor:isT?'#00b4d8':'#fff',strokeWeight:isT?3:2});m.setZIndex(isT?10:1)});
@@ -702,7 +708,7 @@ function selectPoint(pt){
   document.getElementById('detailOverlay').classList.add('visible');map.panTo({lat:pt.lat,lng:pt.lng});if(map.getZoom()<15)map.setZoom(15);
 }
 
-function closeDetail(){document.getElementById('detailOverlay').classList.remove('visible');selectedPoint=null;if(tourneeLoaded&&currentTab==='tournee')showTourneeOnMap()}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('visible');selectedPoint=null;if(currentTab==='tournee'&&tourneeLoaded)showTourneeOnMap();else if(currentTab==='vsic')refreshVsicList()}
 function openNav(){if(!selectedPoint)return;window.open('https://www.google.com/maps/dir/?api=1&destination='+selectedPoint.lat+','+selectedPoint.lng+'&travelmode=driving','_blank')}
 function openSV(){if(!selectedPoint)return;window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+selectedPoint.lat+','+selectedPoint.lng,'_blank')}
 
