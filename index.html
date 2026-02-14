@@ -568,20 +568,34 @@ function setVsicCity(c){
 function getFilteredVsic(){
   let pts=allPoints.filter(p=>p.si==='à faire');
   if(vsicCityFilter!=='all')pts=pts.filter(p=>p.ville===vsicCityFilter);
-  if(vsicFilter==='Individuel')pts=pts.filter(p=>p.type==='Individuel');
-  if(vsicFilter==='Collectif')pts=pts.filter(p=>p.type==='Collectif');
-  if(vsicFilter==='regard_oui')pts=pts.filter(p=>p.regardGaz==='Oui');
-  const q=(document.getElementById('vsicSearch').value||'').toLowerCase();
-  if(q.length>=2)pts=pts.filter(p=>p.raw.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q));
   
-  // Sort: tournee items first when highlight is on
-  if(tourneeLoaded){
-    pts.sort((a,b)=>{
-      const aT=tourneeIds.has(a.id)?0:1;
-      const bT=tourneeIds.has(b.id)?0:1;
-      if(aT!==bT)return aT-bT;
-      return a.raw.localeCompare(b.raw);
-    });
+  // When tournee highlight is ON: tournee points always included, filters only apply to others
+  if(vsicTourneeHighlight&&tourneeLoaded){
+    const tPts=pts.filter(p=>tourneeIds.has(p.id));
+    let others=pts.filter(p=>!tourneeIds.has(p.id));
+    if(vsicFilter==='Individuel')others=others.filter(p=>p.type==='Individuel');
+    if(vsicFilter==='Collectif')others=others.filter(p=>p.type==='Collectif');
+    if(vsicFilter==='regard_oui')others=others.filter(p=>p.regardGaz==='Oui');
+    const q=(document.getElementById('vsicSearch').value||'').toLowerCase();
+    if(q.length>=2){
+      others=others.filter(p=>p.raw.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q));
+    }
+    // Tournee first, then filtered others
+    pts=[...tPts,...others.sort((a,b)=>a.raw.localeCompare(b.raw))];
+  } else {
+    if(vsicFilter==='Individuel')pts=pts.filter(p=>p.type==='Individuel');
+    if(vsicFilter==='Collectif')pts=pts.filter(p=>p.type==='Collectif');
+    if(vsicFilter==='regard_oui')pts=pts.filter(p=>p.regardGaz==='Oui');
+    const q=(document.getElementById('vsicSearch').value||'').toLowerCase();
+    if(q.length>=2)pts=pts.filter(p=>p.raw.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q));
+    if(tourneeLoaded){
+      pts.sort((a,b)=>{
+        const aT=tourneeIds.has(a.id)?0:1;
+        const bT=tourneeIds.has(b.id)?0:1;
+        if(aT!==bT)return aT-bT;
+        return a.raw.localeCompare(b.raw);
+      });
+    }
   }
   return pts;
 }
