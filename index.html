@@ -7,11 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root {
-  --dark:#0a1628;--blue:#1a3a5c;--cyan:#00b4d8;--teal:#0096a7;--green:#2dc653;
-  --orange:#ff8c42;--red:#e63946;--yellow:#ffd166;--surface:#111d30;--card:#162137;
-  --border:#1e3150;--text:#c8d6e5;--white:#f0f4f8;--radius:10px;
-}
+:root{--dark:#0a1628;--blue:#1a3a5c;--cyan:#00b4d8;--teal:#0096a7;--green:#2dc653;--orange:#ff8c42;--red:#e63946;--yellow:#ffd166;--surface:#111d30;--card:#162137;--border:#1e3150;--text:#c8d6e5;--white:#f0f4f8;--radius:10px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);height:100vh;overflow:hidden}
 
@@ -21,7 +17,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);h
 .header h1{font-size:16px;font-weight:600;color:var(--white)}
 .header h1 span{color:var(--cyan)}
 .header-right{display:flex;align-items:center;gap:10px}
-.header-stats{display:flex;gap:14px;font-size:11px}
+.header-stats{display:flex;gap:12px;font-size:11px}
 .stat-item{display:flex;align-items:center;gap:4px}
 .stat-dot{width:7px;height:7px;border-radius:50%}
 
@@ -32,46 +28,58 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);h
 .btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
 .btn-secondary:hover{border-color:var(--cyan);color:var(--cyan)}
 .btn-green{background:var(--green);color:var(--dark)}
-.btn-green:hover{box-shadow:0 3px 12px rgba(45,198,83,0.3)}
 .btn-red{background:var(--red);color:white}
 .btn-orange{background:var(--orange);color:var(--dark)}
 .btn-sm{padding:6px 10px;font-size:10px}
 
 .main{display:flex;height:calc(100vh - 56px)}
 
-.sidebar{width:400px;min-width:400px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+/* SIDEBAR */
+.sidebar{width:420px;min-width:420px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .sidebar-tabs{display:flex;border-bottom:1px solid var(--border)}
-.sidebar-tab{flex:1;padding:9px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.7px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text);transition:all 0.2s}
+.sidebar-tab{flex:1;padding:9px 4px;text-align:center;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text);transition:all 0.2s;white-space:nowrap}
 .sidebar-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(0,180,216,0.05)}
 .sidebar-tab:hover{background:rgba(255,255,255,0.03)}
+.tab-count{font-size:9px;background:rgba(0,180,216,0.15);color:var(--cyan);padding:1px 6px;border-radius:10px;margin-left:3px}
 
-.panel{padding:12px;flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
-.panel.hidden{display:none}
+.tech-bar{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.tech-bar label{font-size:10px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+.tech-bar input{flex:1;padding:6px 8px;font-size:11px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:'DM Sans',sans-serif}
+.tech-bar input:focus{outline:none;border-color:var(--cyan)}
+
+/* PANELS */
+.tab-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.tab-panel.hidden{display:none}
+.panel-pad{padding:12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
 .label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--cyan)}
-textarea{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px;resize:none;flex:1;min-height:100px;line-height:1.7}
+textarea{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px;resize:none;min-height:100px;line-height:1.7;flex:1}
 textarea:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,180,216,0.1)}
 textarea::placeholder{color:#3a5070}
 input[type="text"],input[type="search"]{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 10px;width:100%}
 input:focus{outline:none;border-color:var(--cyan)}
 
-/* VIEW TOGGLE */
-.view-toggle{padding:8px;border-bottom:1px solid var(--border);display:flex;gap:5px}
-.view-btn{flex:1;font-size:10px;padding:7px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;text-align:center;transition:all 0.15s}
-.view-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,180,216,0.1)}
-.view-btn:hover{border-color:var(--cyan)}
-.view-count{font-size:9px;opacity:0.7;margin-left:4px}
+/* TOURNEE PANEL */
+.tournee-info{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:center}
+.tournee-stat{text-align:center;flex:1}
+.tournee-stat-num{font-size:20px;font-weight:700;color:var(--white)}
+.tournee-stat-label{font-size:9px;color:var(--text);margin-top:2px}
+.tournee-divider{width:1px;height:36px;background:var(--border)}
+.tournee-active{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,180,216,0.1)}
+.tournee-badge{display:inline-block;font-size:9px;padding:3px 8px;border-radius:20px;font-weight:600;margin-bottom:8px}
+.tournee-badge.active{background:rgba(0,180,216,0.15);color:var(--cyan)}
+.tournee-badge.inactive{background:rgba(200,214,229,0.1);color:var(--text)}
 
+/* FILTERS & LIST */
 .filters{padding:6px 8px;border-bottom:1px solid var(--border);display:flex;gap:4px;flex-wrap:wrap}
 .filter-btn{font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s}
 .filter-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,180,216,0.08)}
-
 .list-search{padding:6px 8px;border-bottom:1px solid var(--border)}
 .list-panel{flex:1;overflow-y:auto;padding:4px}
 
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;color:#5a7a9a}
-.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.3}
-.empty-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
-.empty-desc{font-size:11px;line-height:1.6}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center;color:#5a7a9a}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:0.3}
+.empty-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.empty-desc{font-size:11px;line-height:1.5}
 
 .list-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;cursor:pointer;transition:all 0.12s;border:1px solid transparent;margin-bottom:1px}
 .list-item:hover{background:rgba(0,180,216,0.05);border-color:var(--border)}
@@ -83,7 +91,7 @@ input:focus{outline:none;border-color:var(--cyan)}
 .list-item-num.nr{background:rgba(230,57,70,0.15);color:var(--red)}
 .list-item-info{flex:1;min-width:0}
 .list-item-addr{font-size:12px;font-weight:500;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.list-item-meta{font-size:9px;color:#5a7a9a;margin-top:2px;display:flex;gap:6px;align-items:center}
+.list-item-meta{font-size:9px;color:#5a7a9a;margin-top:2px;display:flex;gap:5px;align-items:center}
 .badge{font-size:8px;padding:2px 6px;border-radius:20px;font-weight:600;white-space:nowrap}
 .badge-indiv{background:rgba(0,180,216,0.12);color:var(--cyan)}
 .badge-collec{background:rgba(255,140,66,0.12);color:var(--orange)}
@@ -94,16 +102,16 @@ input:focus{outline:none;border-color:var(--cyan)}
 .badge-nr{background:rgba(230,57,70,0.2);color:var(--red)}
 .badge-afaire{background:rgba(200,214,229,0.1);color:var(--text)}
 
+/* MAP */
 .map-container{flex:1;position:relative}
 #map{width:100%;height:100%}
-
-/* WATERMARK */
 .map-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#2a4a6a;pointer-events:none;z-index:5}
 .map-hint.hidden{display:none}
 .map-hint-icon{font-size:48px;margin-bottom:10px;opacity:0.3}
 .map-hint-text{font-size:14px;font-weight:500}
 .map-hint-sub{font-size:11px;margin-top:4px;opacity:0.6}
 
+/* DETAIL OVERLAY */
 .detail-overlay{position:absolute;top:10px;right:10px;width:380px;max-height:calc(100% - 20px);background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow-y:auto;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,0.5);display:none;animation:slideIn 0.25s ease}
 .detail-overlay.visible{display:block}
 @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
@@ -139,6 +147,7 @@ input:focus{outline:none;border-color:var(--cyan)}
 .syndic-title{font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:var(--orange);font-weight:600;margin-bottom:5px}
 .syndic-name{font-size:12px;font-weight:600;color:var(--white)}
 .syndic-phone{font-size:11px;color:var(--cyan);margin-top:2px}
+
 .loading-overlay{position:absolute;inset:0;background:rgba(10,22,40,0.85);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
 .loading-overlay.hidden{display:none}
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
@@ -161,10 +170,6 @@ input:focus{outline:none;border-color:var(--cyan)}
 .modal-actions{display:flex;gap:8px}
 .modal-actions .btn{flex:1}
 
-.tech-bar{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
-.tech-bar label{font-size:10px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
-.tech-bar input{flex:1;padding:6px 8px;font-size:11px}
-
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -179,10 +184,10 @@ input:focus{outline:none;border-color:var(--cyan)}
   </div>
   <div class="header-right">
     <div class="header-stats">
-      <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div><span id="statTotal">–</span></div>
-      <div class="stat-item"><div class="stat-dot" style="background:var(--cyan)"></div><span id="statAfaire">–</span></div>
-      <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div><span id="statDone">–</span></div>
-      <div class="stat-item"><div class="stat-dot" style="background:var(--red)"></div><span id="statNR">–</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--cyan)"></div><span id="statTournee">0 tournée</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--green)"></div><span id="statDone">0 faits</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--red)"></div><span id="statNR">0 N/R</span></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--orange)"></div><span id="statTotal">0 total BDD</span></div>
     </div>
     <button class="btn btn-orange btn-sm" onclick="showExportModal()">&#8681; Export</button>
   </div>
@@ -191,8 +196,9 @@ input:focus{outline:none;border-color:var(--cyan)}
 <div class="main">
   <div class="sidebar">
     <div class="sidebar-tabs">
-      <div class="sidebar-tab active" data-tab="list" onclick="switchTab('list')">Liste</div>
-      <div class="sidebar-tab" data-tab="input" onclick="switchTab('input')">+ Ajouter</div>
+      <div class="sidebar-tab active" data-tab="tournee" onclick="switchTab('tournee')">&#128205; Tournée du jour</div>
+      <div class="sidebar-tab" data-tab="vsic" onclick="switchTab('vsic')">VSIC restant <span class="tab-count" id="vsicCount">0</span></div>
+      <div class="sidebar-tab" data-tab="add" onclick="switchTab('add')">+ Ajouter</div>
     </div>
 
     <div class="tech-bar">
@@ -200,54 +206,78 @@ input:focus{outline:none;border-color:var(--cyan)}
       <input type="text" id="techName" placeholder="Votre nom...">
     </div>
 
-    <!-- LIST -->
-    <div id="listTab" style="display:flex;flex:1;flex-direction:column;overflow:hidden">
-      <div class="view-toggle">
-        <button class="view-btn active" data-view="afaire" onclick="setView('afaire')">
-          À faire <span class="view-count" id="countAfaire"></span>
-        </button>
-        <button class="view-btn" data-view="all" onclick="setView('all')">
-          Toutes <span class="view-count" id="countAll"></span>
-        </button>
+    <!-- TOURNEE TAB -->
+    <div class="tab-panel" id="panelTournee">
+      <div class="panel-pad" id="tourneeInput" style="flex:none">
+        <div class="tournee-badge inactive" id="tourneeBadge">Aucune tournée chargée</div>
+        <div class="label">Collez vos adresses de tournée</div>
+        <textarea id="tourneeAddresses" placeholder="Collez ici les adresses du jour...&#10;Ex:&#10;12 rue de la Paix&#10;34 avenue du Mail&#10;56 boulevard de la Liberté" style="min-height:80px;flex:none"></textarea>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="tourneeCityDefault" value="Rennes" style="width:100px;flex:none" placeholder="Ville">
+          <button class="btn btn-primary" style="flex:1" onclick="loadTournee()">&#9654; Charger la tournée</button>
+        </div>
       </div>
-      <div class="filters">
-        <button class="filter-btn active" data-f="none" onclick="setFilter('none')">Aucun filtre</button>
-        <button class="filter-btn" data-f="Individuel" onclick="setFilter('Individuel')">Individuel</button>
-        <button class="filter-btn" data-f="Collectif" onclick="setFilter('Collectif')">Collectif</button>
-        <button class="filter-btn" data-f="regard_oui" onclick="setFilter('regard_oui')">Regard +</button>
-      </div>
-      <div class="list-search">
-        <input type="search" id="listSearch" placeholder="Rechercher une adresse..." oninput="onSearch()">
-      </div>
-      <div class="list-panel" id="listPanel">
-        <div class="empty-state" id="emptyState">
-          <div class="empty-icon">&#128205;</div>
-          <div class="empty-title">Recherchez une adresse</div>
-          <div class="empty-desc">Tapez dans la barre de recherche ou<br>cliquez sur un filtre pour afficher les interventions</div>
+
+      <div id="tourneeLoaded" style="display:none;flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:8px">
+          <div class="tournee-info tournee-active">
+            <div class="tournee-stat"><div class="tournee-stat-num" id="tTotal">0</div><div class="tournee-stat-label">Total</div></div>
+            <div class="tournee-divider"></div>
+            <div class="tournee-stat"><div class="tournee-stat-num" id="tAfaire" style="color:var(--cyan)">0</div><div class="tournee-stat-label">À faire</div></div>
+            <div class="tournee-divider"></div>
+            <div class="tournee-stat"><div class="tournee-stat-num" id="tDone" style="color:var(--green)">0</div><div class="tournee-stat-label">Faits</div></div>
+            <div class="tournee-divider"></div>
+            <div class="tournee-stat"><div class="tournee-stat-num" id="tNR" style="color:var(--red)">0</div><div class="tournee-stat-label">N/R</div></div>
+          </div>
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" data-tf="all" onclick="setTourneeFilter('all')">Tous</button>
+          <button class="filter-btn" data-tf="afaire" onclick="setTourneeFilter('afaire')">À faire</button>
+          <button class="filter-btn" data-tf="Individuel" onclick="setTourneeFilter('Individuel')">Individuel</button>
+          <button class="filter-btn" data-tf="Collectif" onclick="setTourneeFilter('Collectif')">Collectif</button>
+        </div>
+        <div class="list-search"><input type="search" id="tourneeSearch" placeholder="Rechercher..." oninput="refreshTourneeList()"></div>
+        <div class="list-panel" id="tourneeList"></div>
+        <div style="padding:8px;border-top:1px solid var(--border);display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="resetTournee()">&#8634; Nouvelle tournée</button>
+          <button class="btn btn-orange btn-sm" style="flex:1" onclick="showExportModal()">&#8681; Export tournée</button>
         </div>
       </div>
     </div>
 
-    <!-- INPUT -->
-    <div class="panel hidden" id="inputPanel">
-      <div class="label">Ville par défaut</div>
-      <input type="text" id="defaultCity" value="Rennes">
-      <div class="label">Nouvelles adresses</div>
-      <textarea id="addressInput" placeholder="Collez vos adresses séparées par , ; . ou retours à la ligne..."></textarea>
-      <div class="progress-bar" id="progressBar" style="display:none"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
-      <div style="font-size:10px;text-align:center;color:var(--text)" id="statusText"></div>
-      <button class="btn btn-primary" id="btnAdd" onclick="addAddresses()">Ajouter et lancer l'analyse IA</button>
-      <div style="font-size:9px;color:#3a5a7a;text-align:center">Insérées dans Supabase puis analysées par l'IA via n8n</div>
+    <!-- VSIC TAB -->
+    <div class="tab-panel hidden" id="panelVsic">
+      <div class="filters">
+        <button class="filter-btn active" data-vf="all" onclick="setVsicFilter('all')">Tous</button>
+        <button class="filter-btn" data-vf="Individuel" onclick="setVsicFilter('Individuel')">Individuel</button>
+        <button class="filter-btn" data-vf="Collectif" onclick="setVsicFilter('Collectif')">Collectif</button>
+        <button class="filter-btn" data-vf="regard_oui" onclick="setVsicFilter('regard_oui')">Regard +</button>
+      </div>
+      <div class="list-search"><input type="search" id="vsicSearch" placeholder="Rechercher..." oninput="refreshVsicList()"></div>
+      <div class="list-panel" id="vsicList"></div>
+    </div>
+
+    <!-- ADD TAB -->
+    <div class="tab-panel hidden" id="panelAdd">
+      <div class="panel-pad">
+        <div class="label">Ville par défaut</div>
+        <input type="text" id="defaultCity" value="Rennes">
+        <div class="label">Nouvelles adresses à ajouter en BDD</div>
+        <textarea id="addressInput" placeholder="Collez les adresses à ajouter...&#10;Elles seront insérées dans Supabase et analysées par l'IA"></textarea>
+        <div class="progress-bar" id="progressBar" style="display:none"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+        <div style="font-size:10px;text-align:center;color:var(--text)" id="statusText"></div>
+        <button class="btn btn-primary" id="btnAdd" onclick="addAddresses()">Ajouter en base + Lancer IA</button>
+        <div style="font-size:9px;color:#3a5a7a;text-align:center">Insérées dans Supabase puis analysées automatiquement</div>
+      </div>
     </div>
   </div>
 
   <div class="map-container">
     <div id="map"></div>
-
     <div class="map-hint" id="mapHint">
       <div class="map-hint-icon">&#128205;</div>
-      <div class="map-hint-text">Recherchez ou filtrez pour afficher les interventions</div>
-      <div class="map-hint-sub">Les points apparaîtront ici</div>
+      <div class="map-hint-text">Chargez votre tournée du jour</div>
+      <div class="map-hint-sub">Collez vos adresses dans l'onglet "Tournée du jour"</div>
     </div>
 
     <div class="detail-overlay" id="detailOverlay">
@@ -262,15 +292,15 @@ input:focus{outline:none;border-color:var(--cyan)}
       </div>
       <div class="detail-info" id="detailInfo"></div>
       <div class="detail-obs" id="detailObs" style="display:none"></div>
-      <div class="detail-annotation" id="detailAnnotation">
+      <div class="detail-annotation">
         <div class="annotation-title">Annotation terrain</div>
-        <textarea class="annotation-comment" id="annotComment" placeholder="Commentaire libre..."></textarea>
+        <textarea class="annotation-comment" id="annotComment" placeholder="Commentaire..."></textarea>
         <div class="annotation-buttons">
           <button class="btn btn-green btn-sm" onclick="markIntervention('réalisé')">&#10003; Réalisé</button>
           <button class="btn btn-red btn-sm" onclick="markIntervention('non réalisable')">&#10007; Non réalisable</button>
           <button class="btn btn-secondary btn-sm" onclick="saveComment()">&#128190; Sauver</button>
         </div>
-        <div class="annotation-saved" id="annotSaved">&#10003; Sauvegardé</div>
+        <div class="annotation-saved" id="annotSaved"></div>
       </div>
       <div class="detail-syndic" id="detailSyndic" style="display:none"></div>
     </div>
@@ -284,8 +314,8 @@ input:focus{outline:none;border-color:var(--cyan)}
 <!-- EXPORT MODAL -->
 <div class="modal-overlay" id="exportModal">
   <div class="modal">
-    <h2>Export fin de tournée</h2>
-    <p>Générer le fichier Excel récapitulatif.</p>
+    <h2>Export tournée</h2>
+    <p>Fichier Excel récapitulatif de la tournée du jour.</p>
     <div class="modal-stats">
       <div class="modal-stat"><div class="modal-stat-num" id="expTotal">0</div><div class="modal-stat-label">Total</div></div>
       <div class="modal-stat"><div class="modal-stat-num" id="expDone" style="color:var(--green)">0</div><div class="modal-stat-label">Réalisés</div></div>
@@ -307,9 +337,9 @@ const SB_URL = 'https://aiafvjhiprdldtwmktur.supabase.co';
 const SB_KEY = 'sb_publishable_PY2N4dgVPxdys4aAr66dkQ__DytKqwL';
 const N8N_WEBHOOK = 'https://n8n.srv1146963.hstgr.cloud/webhook/aaa1dc50-7aaf-4f27-a457-c039deade808';
 
-let map, markers = [], allPoints = [], visiblePoints = [], selectedPoint = null;
-let currentView = 'afaire', currentFilter = 'none', searchQuery = '';
-let markersVisible = false;
+let map, markers = [], allPoints = [], tourneePoints = [], selectedPoint = null;
+let currentTab = 'tournee', tourneeFilter = 'all', vsicFilter = 'all';
+let tourneeLoaded = false;
 
 // ─── GOOGLE MAPS ───
 function loadGMaps() {
@@ -349,97 +379,191 @@ async function sbFetch(path, opts = {}) {
   return r.json();
 }
 
-async function loadData() {
-  document.getElementById('loadingOverlay').classList.remove('hidden');
-  document.getElementById('loadingText').textContent = 'Chargement...';
-  try {
-    const data = await sbFetch('/rest/v1/interventions?select=*&order=adresse.asc');
-    allPoints = data.filter(d => d.latitude && d.longitude).map((d, i) => {
-      let obs = null;
-      try {
-        const brut = typeof d.ia_analyse_brute === 'string' ? JSON.parse(d.ia_analyse_brute) : d.ia_analyse_brute;
-        if (brut) obs = brut.observations;
-      } catch(e) {}
-      return {
-        id:d.id, idx:i, raw:d.adresse, ville:d.ville||'Rennes',
-        formatted:d.adresse_formatee||d.adresse, lat:d.latitude, lng:d.longitude,
-        type:d.type_ia||d.type_initial||'Individuel', typeInit:d.type_initial, typeIa:d.type_ia,
-        typeConf:d.type_ia_confiance, regardGaz:d.regard_gaz||'À vérifier',
-        regardConf:d.regard_gaz_confiance, obs:obs, model:d.ia_model,
-        statut:d.statut, si:d.statut_intervention||'à faire',
-        commentaire:d.commentaire||'', technicien:d.technicien||'',
-        dateReal:d.date_realisation,
-        sv1:d.streetview_img1_url, sv2:d.streetview_img2_url
-      };
-    });
-    updateStats();
-    updateCounts();
-    showToast(allPoints.length + ' interventions en mémoire');
-  } catch(e) { showToast('Erreur chargement'); console.error(e); }
-  document.getElementById('loadingOverlay').classList.add('hidden');
+function parsePoint(d, i) {
+  let obs = null;
+  try { const b = typeof d.ia_analyse_brute==='string'?JSON.parse(d.ia_analyse_brute):d.ia_analyse_brute; if(b) obs=b.observations; } catch(e){}
+  return {
+    id:d.id, idx:i, raw:d.adresse, ville:d.ville||'Rennes',
+    formatted:d.adresse_formatee||d.adresse, lat:d.latitude, lng:d.longitude,
+    type:d.type_ia||d.type_initial||'Individuel', typeConf:d.type_ia_confiance,
+    regardGaz:d.regard_gaz||'À vérifier', regardConf:d.regard_gaz_confiance, obs:obs,
+    model:d.ia_model, statut:d.statut, si:d.statut_intervention||'à faire',
+    commentaire:d.commentaire||'', technicien:d.technicien||'', dateReal:d.date_realisation,
+    sv1:d.streetview_img1_url, sv2:d.streetview_img2_url
+  };
 }
 
-// ─── FILTERING ───
-function getFiltered() {
-  let pts = allPoints;
-  // View filter
-  if (currentView === 'afaire') pts = pts.filter(p => p.si === 'à faire');
-  // Type filter
-  if (currentFilter === 'Individuel') pts = pts.filter(p => p.type === 'Individuel');
-  if (currentFilter === 'Collectif') pts = pts.filter(p => p.type === 'Collectif');
-  if (currentFilter === 'regard_oui') pts = pts.filter(p => p.regardGaz === 'Oui');
-  // Search
-  if (searchQuery.length >= 2) {
-    const q = searchQuery.toLowerCase();
-    pts = pts.filter(p => p.raw.toLowerCase().includes(q) || (p.formatted && p.formatted.toLowerCase().includes(q)));
+async function loadAllData() {
+  showLoading('Chargement BDD...');
+  try {
+    const data = await sbFetch('/rest/v1/interventions?select=*&order=adresse.asc');
+    allPoints = data.filter(d=>d.latitude&&d.longitude).map((d,i)=>parsePoint(d,i));
+    updateGlobalStats();
+    showToast(allPoints.length + ' interventions en mémoire');
+  } catch(e) { showToast('Erreur chargement'); console.error(e); }
+  hideLoading();
+}
+
+// ─── TOURNEE ───
+function loadTournee() {
+  const text = document.getElementById('tourneeAddresses').value.trim();
+  if (!text) return showToast('Collez vos adresses');
+  const city = document.getElementById('tourneeCityDefault').value.trim()||'Rennes';
+
+  const inputAddrs = text.split(/[\n\r]+/).map(a=>a.replace(/^\s*[\*\-\d\.]+[\)\.\s]*/,'').trim()).filter(a=>a.length>3);
+  if (!inputAddrs.length) return showToast('Aucune adresse détectée');
+
+  // Match against DB
+  tourneePoints = [];
+  const unmatched = [];
+
+  inputAddrs.forEach(addr => {
+    const norm = addr.toLowerCase().replace(/[,\s]+/g,' ').trim();
+    const match = allPoints.find(p => {
+      const pNorm = p.raw.toLowerCase().replace(/[,\s]+/g,' ').trim();
+      const pFull = (p.formatted||'').toLowerCase().replace(/[,\s]+/g,' ').trim();
+      return pNorm === norm || pFull.includes(norm) || norm.includes(pNorm);
+    });
+    if (match && !tourneePoints.find(t=>t.id===match.id)) {
+      tourneePoints.push(match);
+    } else {
+      unmatched.push(addr);
+    }
+  });
+
+  if (tourneePoints.length === 0) {
+    showToast('Aucune correspondance trouvée en BDD');
+    return;
   }
+
+  tourneeLoaded = true;
+  document.getElementById('tourneeInput').style.display = 'none';
+  document.getElementById('tourneeLoaded').style.display = 'flex';
+  document.getElementById('tourneeBadge').className = 'tournee-badge active';
+  document.getElementById('tourneeBadge').textContent = 'Tournée chargée — ' + tourneePoints.length + ' interventions';
+
+  if (unmatched.length > 0) {
+    showToast(tourneePoints.length + ' trouvées, ' + unmatched.length + ' non trouvées en BDD');
+  } else {
+    showToast(tourneePoints.length + ' interventions chargées');
+  }
+
+  updateTourneeStats();
+  refreshTourneeList();
+  showTourneeOnMap();
+}
+
+function resetTournee() {
+  tourneeLoaded = false;
+  tourneePoints = [];
+  document.getElementById('tourneeInput').style.display = 'flex';
+  document.getElementById('tourneeLoaded').style.display = 'none';
+  document.getElementById('tourneeBadge').className = 'tournee-badge inactive';
+  document.getElementById('tourneeBadge').textContent = 'Aucune tournée chargée';
+  document.getElementById('tourneeAddresses').value = '';
+  clearMarkers();
+  document.getElementById('mapHint').classList.remove('hidden');
+  closeDetail();
+  updateGlobalStats();
+}
+
+function showTourneeOnMap() {
+  clearMarkers();
+  document.getElementById('mapHint').classList.add('hidden');
+  const pts = getFilteredTournee();
+  placeMarkers(pts);
+  fitBounds(pts);
+}
+
+function getFilteredTournee() {
+  let pts = tourneePoints;
+  if (tourneeFilter==='afaire') pts=pts.filter(p=>p.si==='à faire');
+  if (tourneeFilter==='Individuel') pts=pts.filter(p=>p.type==='Individuel');
+  if (tourneeFilter==='Collectif') pts=pts.filter(p=>p.type==='Collectif');
+  const q = (document.getElementById('tourneeSearch').value||'').toLowerCase();
+  if (q.length>=2) pts=pts.filter(p=>p.raw.toLowerCase().includes(q));
   return pts;
 }
 
-function shouldShowMarkers() {
-  // Show markers only if user has searched or applied a filter
-  return searchQuery.length >= 2 || currentFilter !== 'none';
+function refreshTourneeList() {
+  const pts = getFilteredTournee();
+  renderList(document.getElementById('tourneeList'), pts);
+  if (tourneeLoaded) showTourneeOnMap();
 }
 
-function refreshDisplay() {
-  visiblePoints = getFiltered();
-  const show = shouldShowMarkers();
+function updateTourneeStats() {
+  const t=tourneePoints.length, af=tourneePoints.filter(p=>p.si==='à faire').length;
+  const d=tourneePoints.filter(p=>p.si==='réalisé').length, n=tourneePoints.filter(p=>p.si==='non réalisable').length;
+  document.getElementById('tTotal').textContent=t;
+  document.getElementById('tAfaire').textContent=af;
+  document.getElementById('tDone').textContent=d;
+  document.getElementById('tNR').textContent=n;
+  document.getElementById('statTournee').textContent=t+' tournée';
+  document.getElementById('statDone').textContent=d+' faits';
+  document.getElementById('statNR').textContent=n+' N/R';
+}
 
-  // Map hint
-  document.getElementById('mapHint').classList.toggle('hidden', show || visiblePoints.length === 0);
+function setTourneeFilter(f) {
+  tourneeFilter=f;
+  document.querySelectorAll('[data-tf]').forEach(b=>b.classList.toggle('active',b.dataset.tf===f));
+  refreshTourneeList();
+}
 
-  // Clear old markers
-  clearMarkers();
+// ─── VSIC ───
+function getFilteredVsic() {
+  let pts = allPoints.filter(p=>p.si==='à faire');
+  if (vsicFilter==='Individuel') pts=pts.filter(p=>p.type==='Individuel');
+  if (vsicFilter==='Collectif') pts=pts.filter(p=>p.type==='Collectif');
+  if (vsicFilter==='regard_oui') pts=pts.filter(p=>p.regardGaz==='Oui');
+  const q=(document.getElementById('vsicSearch').value||'').toLowerCase();
+  if(q.length>=2) pts=pts.filter(p=>p.raw.toLowerCase().includes(q));
+  return pts;
+}
 
-  // Render list
-  renderList(visiblePoints);
+function refreshVsicList() {
+  const pts = getFilteredVsic();
+  renderList(document.getElementById('vsicList'), pts);
+}
 
-  // Place markers only if needed
-  if (show && visiblePoints.length > 0) {
-    placeMarkers(visiblePoints);
-    fitBounds(visiblePoints);
-    markersVisible = true;
-  } else if (!show) {
-    // Show empty state if no search
-    markersVisible = false;
+function setVsicFilter(f) {
+  vsicFilter=f;
+  document.querySelectorAll('[data-vf]').forEach(b=>b.classList.toggle('active',b.dataset.vf===f));
+  refreshVsicList();
+}
+
+// ─── GENERIC LIST RENDER ───
+function renderList(container, pts) {
+  container.innerHTML = '';
+  if (!pts.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128269;</div><div class="empty-title">Aucun résultat</div></div>';
+    return;
   }
+  pts.forEach((pt,i) => {
+    const el = document.createElement('div'); el.className='list-item'; el.id='li-'+pt.id;
+    el.onclick=()=>selectPoint(pt);
+    const nc=pt.si==='réalisé'?'done':pt.si==='non réalisable'?'nr':pt.type==='Individuel'?'indiv':'collec';
+    const rb=pt.regardGaz==='Oui'?'badge-oui':pt.regardGaz==='Non'?'badge-non':'badge-incertain';
+    const sb=pt.si==='réalisé'?'badge-realise':pt.si==='non réalisable'?'badge-nr':'badge-afaire';
+    el.innerHTML='<div class="list-item-num '+nc+'">'+(i+1)+'</div>'
+      +'<div class="list-item-info"><div class="list-item-addr">'+pt.raw+'</div>'
+      +'<div class="list-item-meta"><span class="badge '+(pt.type==='Individuel'?'badge-indiv':'badge-collec')+'">'+pt.type+'</span>'
+      +'<span class="badge '+rb+'">'+pt.regardGaz+'</span>'
+      +'<span class="badge '+sb+'">'+pt.si+'</span></div></div>';
+    container.appendChild(el);
+  });
 }
 
 // ─── MARKERS ───
-function markerColor(pt) {
-  if (pt.si === 'réalisé') return '#2dc653';
-  if (pt.si === 'non réalisable') return '#e63946';
-  if (pt.regardGaz === 'Oui') return '#ffd166';
-  return pt.type === 'Collectif' ? '#ff8c42' : '#00b4d8';
+function markerColor(pt){
+  if(pt.si==='réalisé')return'#2dc653';if(pt.si==='non réalisable')return'#e63946';
+  if(pt.regardGaz==='Oui')return'#ffd166';return pt.type==='Collectif'?'#ff8c42':'#00b4d8';
 }
 
-function placeMarkers(pts) {
-  pts.forEach((pt, i) => {
-    const c = markerColor(pt);
-    const m = new google.maps.Marker({
-      position:{lat:pt.lat,lng:pt.lng}, map,
-      title:pt.raw,
-      icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:c,fillOpacity:0.9,strokeColor:'#fff',strokeWeight:2},
+function placeMarkers(pts){
+  pts.forEach((pt,i)=>{
+    const m=new google.maps.Marker({
+      position:{lat:pt.lat,lng:pt.lng},map,title:pt.raw,
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:markerColor(pt),fillOpacity:0.9,strokeColor:'#fff',strokeWeight:2},
       label:{text:String(i+1),color:'#fff',fontSize:'9px',fontWeight:'700'},
       zIndex:pt.si==='réalisé'?0:2
     });
@@ -450,83 +574,75 @@ function placeMarkers(pts) {
 
 function clearMarkers(){markers.forEach(m=>m.setMap(null));markers=[]}
 
-function fitBounds(pts) {
-  if(!pts || !pts.length) return;
-  if (pts.length === 1) {
-    map.setCenter({lat:pts[0].lat,lng:pts[0].lng});
-    map.setZoom(16);
-    return;
-  }
-  const b = new google.maps.LatLngBounds();
-  pts.forEach(p=>b.extend({lat:p.lat,lng:p.lng}));
-  map.fitBounds(b,{padding:60});
-}
-
-function refreshMarker(pt) {
-  const i = visiblePoints.findIndex(p=>p.id===pt.id);
-  if (i===-1 || !markers[i]) return;
-  markers[i].setIcon({path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:markerColor(pt),fillOpacity:0.9,strokeColor:'#fff',strokeWeight:2});
+function fitBounds(pts){
+  if(!pts||!pts.length)return;
+  if(pts.length===1){map.setCenter({lat:pts[0].lat,lng:pts[0].lng});map.setZoom(16);return}
+  const b=new google.maps.LatLngBounds();pts.forEach(p=>b.extend({lat:p.lat,lng:p.lng}));map.fitBounds(b,{padding:60});
 }
 
 // ─── SELECT ───
-function selectPoint(pt) {
-  selectedPoint = pt;
+function selectPoint(pt){
+  selectedPoint=pt;
 
-  // Highlight marker
-  markers.forEach((m,i)=>{
-    const p=visiblePoints[i]; if(!p) return;
-    const a = p.id===pt.id;
-    m.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:a?13:9,fillColor:a?'#fff':markerColor(p),fillOpacity:0.9,strokeColor:a?'#00b4d8':'#fff',strokeWeight:a?3:2});
-    m.setZIndex(a?10:1);
-  });
+  // If clicking from VSIC tab and not in tournee, show on map
+  if (currentTab === 'vsic') {
+    clearMarkers();
+    placeMarkers([pt]);
+    map.setCenter({lat:pt.lat,lng:pt.lng});
+    map.setZoom(16);
+    document.getElementById('mapHint').classList.add('hidden');
+  }
 
+  // Highlight in list
   document.querySelectorAll('.list-item').forEach(e=>e.classList.remove('active'));
   const li=document.getElementById('li-'+pt.id);
   if(li){li.classList.add('active');li.scrollIntoView({behavior:'smooth',block:'nearest'})}
 
-  document.getElementById('detailTitle').textContent = pt.raw;
-  document.getElementById('detailSub').textContent = pt.formatted + ', ' + pt.ville;
+  // Highlight marker
+  markers.forEach((m,i)=>{
+    const pos=m.getPosition();
+    const isThis=Math.abs(pos.lat()-pt.lat)<0.0001&&Math.abs(pos.lng()-pt.lng)<0.0001;
+    m.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:isThis?13:9,fillColor:isThis?'#fff':m.__color||'#00b4d8',fillOpacity:0.9,strokeColor:isThis?'#00b4d8':'#fff',strokeWeight:isThis?3:2});
+    m.setZIndex(isThis?10:1);
+  });
+
+  document.getElementById('detailTitle').textContent=pt.raw;
+  document.getElementById('detailSub').textContent=pt.formatted+', '+pt.ville;
 
   // Street View
-  const sv = document.getElementById('detailSV'); sv.innerHTML = '';
+  const sv=document.getElementById('detailSV');sv.innerHTML='';
   [{h:0,l:'Vue façade',u:pt.sv1},{h:180,l:'Vue opposée',u:pt.sv2}].forEach(a=>{
     const d=document.createElement('div');
     const img=document.createElement('img');img.className='sv-img';
     img.src=a.u||('https://maps.googleapis.com/maps/api/streetview?size=600x400&location='+pt.lat+','+pt.lng+'&heading='+a.h+'&pitch=5&fov=90&key='+API_KEY);
     img.loading='lazy';
     img.onclick=()=>window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+pt.lat+','+pt.lng+'&heading='+a.h,'_blank');
-    d.appendChild(img);
-    const lb=document.createElement('div');lb.className='sv-label';lb.textContent=a.l;d.appendChild(lb);
-    sv.appendChild(d);
+    d.appendChild(img);const lb=document.createElement('div');lb.className='sv-label';lb.textContent=a.l;d.appendChild(lb);sv.appendChild(d);
   });
 
   // Info
-  const cc = v => v>=0.8?'var(--green)':v>=0.5?'var(--yellow)':'var(--red)';
-  const rb = pt.regardGaz==='Oui'?'badge-oui':pt.regardGaz==='Non'?'badge-non':'badge-incertain';
-  const sb = pt.si==='réalisé'?'badge-realise':pt.si==='non réalisable'?'badge-nr':'badge-afaire';
-  const info = document.getElementById('detailInfo');
-  info.innerHTML = '<div class="info-row"><span class="info-label">Statut</span><span class="info-value"><span class="badge '+sb+'">'+pt.si+'</span></span></div>'
-    +'<div class="info-row"><span class="info-label">Type IA</span><span class="info-value"><span class="badge '+(pt.type==='Individuel'?'badge-indiv':'badge-collec')+'">'+pt.type+'</span></span></div>'
+  const cc=v=>v>=0.8?'var(--green)':v>=0.5?'var(--yellow)':'var(--red)';
+  const rb=pt.regardGaz==='Oui'?'badge-oui':pt.regardGaz==='Non'?'badge-non':'badge-incertain';
+  const sb=pt.si==='réalisé'?'badge-realise':pt.si==='non réalisable'?'badge-nr':'badge-afaire';
+  document.getElementById('detailInfo').innerHTML=
+    '<div class="info-row"><span class="info-label">Statut</span><span class="info-value"><span class="badge '+sb+'">'+pt.si+'</span></span></div>'
+    +'<div class="info-row"><span class="info-label">Type</span><span class="info-value"><span class="badge '+(pt.type==='Individuel'?'badge-indiv':'badge-collec')+'">'+pt.type+'</span></span></div>'
     +(pt.typeConf!=null?'<div class="info-row"><span class="info-label">Confiance</span><span class="info-value"><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:'+(pt.typeConf*100)+'%;background:'+cc(pt.typeConf)+'"></div></div><span class="conf-text" style="color:'+cc(pt.typeConf)+'">'+Math.round(pt.typeConf*100)+'%</span></div></span></div>':'')
     +'<div class="info-row"><span class="info-label">Regard Gaz</span><span class="info-value"><span class="badge '+rb+'">'+pt.regardGaz+'</span></span></div>'
-    +(pt.regardConf!=null?'<div class="info-row"><span class="info-label">Conf. regard</span><span class="info-value"><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:'+(pt.regardConf*100)+'%;background:'+cc(pt.regardConf)+'"></div></div><span class="conf-text" style="color:'+cc(pt.regardConf)+'">'+Math.round(pt.regardConf*100)+'%</span></div></span></div>':'')
     +'<div class="info-row"><span class="info-label">GPS</span><span class="info-value" style="font-family:\'JetBrains Mono\',monospace;font-size:9px">'+pt.lat.toFixed(5)+', '+pt.lng.toFixed(5)+'</span></div>';
 
-  // Observations
   const obs=document.getElementById('detailObs');
   if(pt.obs){obs.style.display='block';obs.innerHTML='<div class="detail-obs-title">Observations IA</div>'+pt.obs}else{obs.style.display='none'}
 
-  // Annotation
-  document.getElementById('annotComment').value = pt.commentaire;
-  document.getElementById('annotSaved').style.display = 'none';
+  document.getElementById('annotComment').value=pt.commentaire;
+  document.getElementById('annotSaved').style.display='none';
 
-  // Syndic
   const syn=document.getElementById('detailSyndic');
   if(pt.type==='Collectif'){
-    const syndics=[{n:"Nexity Lamy",t:"02 99 67 XX XX"},{n:"Foncia Rennes",t:"02 99 30 XX XX"},{n:"Citya Belvia",t:"02 99 22 XX XX"}];
-    const s=syndics[Math.floor(Math.random()*syndics.length)];
-    syn.style.display='block';syn.innerHTML='<div class="syndic-card"><div class="syndic-title">Syndic</div><div class="syndic-name">'+s.n+'</div><div class="syndic-phone">'+s.t+'</div></div>';
-  } else{syn.style.display='none'}
+    const s=[{n:"Nexity Lamy",t:"02 99 67 XX XX"},{n:"Foncia Rennes",t:"02 99 30 XX XX"},{n:"Citya Belvia",t:"02 99 22 XX XX"}];
+    const pick=s[Math.floor(Math.random()*s.length)];
+    syn.style.display='block';syn.innerHTML='<div class="syndic-card"><div class="syndic-title">Syndic</div><div class="syndic-name">'+pick.n+'</div><div class="syndic-phone">'+pick.t+'</div></div>';
+  }else{syn.style.display='none'}
 
   document.getElementById('detailOverlay').classList.add('visible');
   map.panTo({lat:pt.lat,lng:pt.lng});
@@ -536,219 +652,148 @@ function selectPoint(pt) {
 function closeDetail(){
   document.getElementById('detailOverlay').classList.remove('visible');
   selectedPoint=null;
-  markers.forEach((m,i)=>{const p=visiblePoints[i];if(!p)return;m.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:markerColor(p),fillOpacity:0.9,strokeColor:'#fff',strokeWeight:2})});
+  if(tourneeLoaded && currentTab==='tournee') showTourneeOnMap();
 }
 function openNav(){if(!selectedPoint)return;window.open('https://www.google.com/maps/dir/?api=1&destination='+selectedPoint.lat+','+selectedPoint.lng+'&travelmode=driving','_blank')}
 function openSV(){if(!selectedPoint)return;window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+selectedPoint.lat+','+selectedPoint.lng,'_blank')}
 
 // ─── ANNOTATIONS ───
-async function markIntervention(statut) {
-  if (!selectedPoint) return;
-  const tech = document.getElementById('techName').value.trim();
-  const comment = document.getElementById('annotComment').value.trim();
-  const now = new Date().toISOString();
-  const ok = await sbFetch('/rest/v1/interventions?id=eq.' + selectedPoint.id, {
-    method:'PATCH', headers:{'Prefer':'return=minimal'},
+async function markIntervention(statut){
+  if(!selectedPoint)return;
+  const tech=document.getElementById('techName').value.trim();
+  const comment=document.getElementById('annotComment').value.trim();
+  const now=new Date().toISOString();
+  const ok=await sbFetch('/rest/v1/interventions?id=eq.'+selectedPoint.id,{
+    method:'PATCH',headers:{'Prefer':'return=minimal'},
     body:JSON.stringify({statut_intervention:statut,commentaire:comment,technicien:tech,date_realisation:now})
   });
-  if (ok) {
-    selectedPoint.si = statut;
-    selectedPoint.commentaire = comment;
-    selectedPoint.technicien = tech;
-    selectedPoint.dateReal = now;
-    updateStats();
-    updateCounts();
-    refreshDisplay();
-    // Reselect to refresh panel
+  if(ok){
+    selectedPoint.si=statut;selectedPoint.commentaire=comment;selectedPoint.technicien=tech;selectedPoint.dateReal=now;
+    // Update in allPoints too
+    const ap=allPoints.find(p=>p.id===selectedPoint.id);
+    if(ap){ap.si=statut;ap.commentaire=comment;ap.technicien=tech;ap.dateReal=now}
+    updateTourneeStats();updateGlobalStats();
+    if(currentTab==='tournee')refreshTourneeList();
+    if(currentTab==='vsic')refreshVsicList();
     selectPoint(selectedPoint);
     document.getElementById('annotSaved').style.display='block';
     document.getElementById('annotSaved').textContent='✓ '+statut;
+    document.getElementById('annotSaved').style.color=statut==='réalisé'?'var(--green)':'var(--red)';
     showToast(selectedPoint.raw+' → '+statut);
-  } else { showToast('Erreur sauvegarde'); }
+  }else{showToast('Erreur sauvegarde')}
 }
 
-async function saveComment() {
-  if (!selectedPoint) return;
-  const comment = document.getElementById('annotComment').value.trim();
-  const tech = document.getElementById('techName').value.trim();
-  const ok = await sbFetch('/rest/v1/interventions?id=eq.' + selectedPoint.id, {
-    method:'PATCH', headers:{'Prefer':'return=minimal'},
+async function saveComment(){
+  if(!selectedPoint)return;
+  const comment=document.getElementById('annotComment').value.trim();
+  const tech=document.getElementById('techName').value.trim();
+  const ok=await sbFetch('/rest/v1/interventions?id=eq.'+selectedPoint.id,{
+    method:'PATCH',headers:{'Prefer':'return=minimal'},
     body:JSON.stringify({commentaire:comment,technicien:tech})
   });
-  if (ok) {
+  if(ok){
     selectedPoint.commentaire=comment;selectedPoint.technicien=tech;
+    const ap=allPoints.find(p=>p.id===selectedPoint.id);if(ap){ap.commentaire=comment;ap.technicien=tech}
     document.getElementById('annotSaved').style.display='block';
     document.getElementById('annotSaved').textContent='✓ Sauvegardé';
+    document.getElementById('annotSaved').style.color='var(--green)';
     setTimeout(()=>document.getElementById('annotSaved').style.display='none',2000);
   }
 }
 
-// ─── LIST ───
-function renderList(pts) {
-  const panel = document.getElementById('listPanel');
-  const empty = document.getElementById('emptyState');
-
-  if (!shouldShowMarkers() && searchQuery.length < 2) {
-    panel.innerHTML = '';
-    panel.appendChild(empty);
-    empty.style.display = 'flex';
-    return;
-  }
-
-  panel.innerHTML = '';
-  if (pts.length === 0) {
-    const noRes = document.createElement('div');
-    noRes.className = 'empty-state';
-    noRes.innerHTML = '<div class="empty-icon">&#128269;</div><div class="empty-title">Aucun résultat</div><div class="empty-desc">Modifiez votre recherche ou vos filtres</div>';
-    panel.appendChild(noRes);
-    return;
-  }
-
-  pts.forEach((pt, i) => {
-    const el = document.createElement('div');
-    el.className = 'list-item'; el.id = 'li-' + pt.id;
-    el.onclick = () => selectPoint(pt);
-    const rb = pt.regardGaz==='Oui'?'badge-oui':pt.regardGaz==='Non'?'badge-non':'badge-incertain';
-    const numClass = pt.si==='réalisé'?'done':pt.si==='non réalisable'?'nr':pt.type==='Individuel'?'indiv':'collec';
-    const sb = pt.si==='réalisé'?'badge-realise':pt.si==='non réalisable'?'badge-nr':'badge-afaire';
-    el.innerHTML = '<div class="list-item-num '+numClass+'">'+(i+1)+'</div>'
-      +'<div class="list-item-info"><div class="list-item-addr">'+pt.raw+'</div>'
-      +'<div class="list-item-meta"><span class="badge '+(pt.type==='Individuel'?'badge-indiv':'badge-collec')+'">'+pt.type+'</span>'
-      +'<span class="badge '+rb+'">'+pt.regardGaz+'</span>'
-      +'<span class="badge '+sb+'">'+pt.si+'</span></div></div>';
-    panel.appendChild(el);
-  });
-}
-
-// ─── CONTROLS ───
-function onSearch() {
-  searchQuery = (document.getElementById('listSearch').value||'').trim();
-  refreshDisplay();
-}
-
-function setView(v) {
-  currentView = v;
-  document.querySelectorAll('.view-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  refreshDisplay();
-}
-
-function setFilter(f) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
-  refreshDisplay();
-}
-
-function updateStats() {
-  const t=allPoints.length;
+// ─── STATS ───
+function updateGlobalStats(){
   const af=allPoints.filter(p=>p.si==='à faire').length;
-  const d=allPoints.filter(p=>p.si==='réalisé').length;
-  const n=allPoints.filter(p=>p.si==='non réalisable').length;
-  document.getElementById('statTotal').textContent=t+' total';
-  document.getElementById('statAfaire').textContent=af+' à faire';
-  document.getElementById('statDone').textContent=d+' faits';
-  document.getElementById('statNR').textContent=n+' N/R';
-}
-
-function updateCounts() {
-  const af=allPoints.filter(p=>p.si==='à faire').length;
-  document.getElementById('countAfaire').textContent='('+af+')';
-  document.getElementById('countAll').textContent='('+allPoints.length+')';
+  document.getElementById('statTotal').textContent=allPoints.length+' total BDD';
+  document.getElementById('vsicCount').textContent=af;
+  if(!tourneeLoaded){
+    document.getElementById('statTournee').textContent='0 tournée';
+    document.getElementById('statDone').textContent='0 faits';
+    document.getElementById('statNR').textContent='0 N/R';
+  }
 }
 
 // ─── TABS ───
-function switchTab(tab) {
+function switchTab(tab){
+  currentTab=tab;
   document.querySelectorAll('.sidebar-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector('.sidebar-tab[data-tab="'+tab+'"]').classList.add('active');
-  document.getElementById('listTab').style.display=tab==='list'?'flex':'none';
-  const ip=document.getElementById('inputPanel');ip.classList.toggle('hidden',tab!=='input');ip.style.display=tab==='input'?'flex':'none';
+  document.getElementById('panelTournee').classList.toggle('hidden',tab!=='tournee');
+  document.getElementById('panelVsic').classList.toggle('hidden',tab!=='vsic');
+  document.getElementById('panelAdd').classList.toggle('hidden',tab!=='add');
+
+  // Adjust map
+  if(tab==='tournee'&&tourneeLoaded){showTourneeOnMap();document.getElementById('mapHint').classList.add('hidden')}
+  else if(tab==='vsic'){clearMarkers();document.getElementById('mapHint').classList.add('hidden');refreshVsicList()}
+  else if(tab==='add'){/* keep map as is */}
+  else if(!tourneeLoaded){clearMarkers();document.getElementById('mapHint').classList.remove('hidden')}
 }
 
 // ─── ADD ADDRESSES ───
-async function addAddresses() {
-  const text = document.getElementById('addressInput').value.trim();
-  if (!text) return showToast('Saisissez des adresses');
-  const city = document.getElementById('defaultCity').value.trim()||'Rennes';
-  const addrs = text.split(/[,;\.\n\r\|]+/).map(a=>a.replace(/^\s*[\*\-\d\.]+\s*/,'').trim()).filter(a=>a.length>3);
-  if (!addrs.length) return showToast('Aucune adresse');
+async function addAddresses(){
+  const text=document.getElementById('addressInput').value.trim();
+  if(!text)return showToast('Saisissez des adresses');
+  const city=document.getElementById('defaultCity').value.trim()||'Rennes';
+  const addrs=text.split(/[,;\.\n\r\|]+/).map(a=>a.replace(/^\s*[\*\-\d\.]+[\)\.\s]*/,'').trim()).filter(a=>a.length>3);
+  if(!addrs.length)return showToast('Aucune adresse');
 
   document.getElementById('btnAdd').disabled=true;
-  document.getElementById('progressBar').style.display='block';
-  document.getElementById('loadingOverlay').classList.remove('hidden');
-  document.getElementById('loadingText').textContent='Insertion...';
+  showLoading('Insertion de '+addrs.length+' adresses...');
 
-  const rows = addrs.map(a=>({adresse:a,ville:city,type_initial:'Individuel',statut:'en_attente',statut_intervention:'à faire'}));
-  try {
-    await fetch(SB_URL+'/rest/v1/interventions',{
-      method:'POST',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify(rows)
-    });
-    if(N8N_WEBHOOK){
-      try{await fetch(N8N_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'analyse',count:addrs.length})})}catch(e){}
-    }
-    showToast(addrs.length+' adresses ajoutées');
+  const rows=addrs.map(a=>({adresse:a,ville:city,type_initial:'Individuel',statut:'en_attente',statut_intervention:'à faire'}));
+  try{
+    await fetch(SB_URL+'/rest/v1/interventions',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rows)});
+    if(N8N_WEBHOOK){try{await fetch(N8N_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'analyse',count:addrs.length})})}catch(e){}}
+    showToast(addrs.length+' adresses ajoutées — analyse IA en cours');
     document.getElementById('addressInput').value='';
-    await loadData();
-    switchTab('list');
+    await loadAllData();
+    switchTab('vsic');
   }catch(e){showToast('Erreur');console.error(e)}
-  document.getElementById('loadingOverlay').classList.add('hidden');
+  hideLoading();
   document.getElementById('btnAdd').disabled=false;
-  document.getElementById('progressBar').style.display='none';
 }
 
 // ─── EXPORT ───
 function showExportModal(){
-  const t=allPoints.length,d=allPoints.filter(p=>p.si==='réalisé').length,n=allPoints.filter(p=>p.si==='non réalisable').length;
-  document.getElementById('expTotal').textContent=t;document.getElementById('expDone').textContent=d;document.getElementById('expNR').textContent=n;
+  const pts=tourneeLoaded?tourneePoints:allPoints;
+  const d=pts.filter(p=>p.si==='réalisé').length,n=pts.filter(p=>p.si==='non réalisable').length;
+  document.getElementById('expTotal').textContent=pts.length;
+  document.getElementById('expDone').textContent=d;document.getElementById('expNR').textContent=n;
   document.getElementById('exportModal').classList.add('visible');
 }
 function closeExportModal(){document.getElementById('exportModal').classList.remove('visible')}
 
 function exportExcel(){
   const tech=document.getElementById('techName').value.trim()||'Technicien';
-  const now=new Date();
-  const dateStr=now.toLocaleDateString('fr-FR').replace(/\//g,'-');
-  const fileDate=now.toISOString().slice(0,10);
+  const now=new Date();const dateStr=now.toLocaleDateString('fr-FR').replace(/\//g,'-');const fileDate=now.toISOString().slice(0,10);
+  const pts=tourneeLoaded?tourneePoints:allPoints;
 
-  const data=allPoints.map(pt=>({
-    'Adresse':pt.raw,
-    'Ville':pt.ville,
+  const data=pts.map(pt=>({
+    'Adresse':pt.raw,'Ville':pt.ville,
     'Type (Individuel/Collectif)':pt.type||'Individuel',
     'Réalisé (Oui/Non)':pt.si==='réalisé'?'Oui':(pt.si==='non réalisable'?'Non':''),
-    'Regard Gaz':pt.regardGaz,
-    'Commentaire':pt.commentaire||'',
+    'Regard Gaz':pt.regardGaz,'Commentaire':pt.commentaire||'',
     'Technicien':pt.technicien||tech,
     'Date':pt.dateReal?new Date(pt.dateReal).toLocaleDateString('fr-FR'):''
   }));
-
   const ws=XLSX.utils.json_to_sheet(data);
   ws['!cols']=[{wch:35},{wch:10},{wch:22},{wch:16},{wch:12},{wch:30},{wch:18},{wch:12}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Tournee '+dateStr);
-
-  const summary=[
-    {Info:'Technicien',Valeur:tech},{Info:'Date',Valeur:dateStr},
-    {Info:'Total',Valeur:allPoints.length},
-    {Info:'Réalisées',Valeur:allPoints.filter(p=>p.si==='réalisé').length},
-    {Info:'Non réalisables',Valeur:allPoints.filter(p=>p.si==='non réalisable').length},
-    {Info:'À faire',Valeur:allPoints.filter(p=>p.si==='à faire').length},
-    {Info:'Individuels',Valeur:allPoints.filter(p=>p.type==='Individuel').length},
-    {Info:'Collectifs',Valeur:allPoints.filter(p=>p.type==='Collectif').length},
-    {Info:'Regards gaz',Valeur:allPoints.filter(p=>p.regardGaz==='Oui').length}
-  ];
-  const ws2=XLSX.utils.json_to_sheet(summary);
-  ws2['!cols']=[{wch:25},{wch:20}];
+  const summary=[{Info:'Technicien',Valeur:tech},{Info:'Date',Valeur:dateStr},{Info:'Total',Valeur:pts.length},{Info:'Realisees',Valeur:pts.filter(p=>p.si==='réalisé').length},{Info:'Non realisables',Valeur:pts.filter(p=>p.si==='non réalisable').length},{Info:'A faire',Valeur:pts.filter(p=>p.si==='à faire').length}];
+  const ws2=XLSX.utils.json_to_sheet(summary);ws2['!cols']=[{wch:25},{wch:20}];
   XLSX.utils.book_append_sheet(wb,ws2,'Resume');
-
   XLSX.writeFile(wb,'GRDF_Tournee_'+fileDate+'_'+tech.replace(/\s/g,'_')+'.xlsx');
-  closeExportModal();
-  showToast('Export téléchargé');
+  closeExportModal();showToast('Export téléchargé');
 }
 
+// ─── UTILS ───
+function showLoading(msg){document.getElementById('loadingOverlay').classList.remove('hidden');document.getElementById('loadingText').textContent=msg||'Chargement...'}
+function hideLoading(){document.getElementById('loadingOverlay').classList.add('hidden')}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),3000)}
 
 // ─── INIT ───
-initMap().then(()=>loadData());
+initMap().then(()=>loadAllData());
 </script>
 </body>
 </html>
