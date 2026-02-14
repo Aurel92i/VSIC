@@ -673,7 +673,7 @@ function exportExcel() {
   ];
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Tournée ' + dateStr);
+  XLSX.utils.book_append_sheet(wb, ws, 'Tournee ' + dateStr.replace(/\//g, '-'));
 
   // Summary sheet
   const summary = [
